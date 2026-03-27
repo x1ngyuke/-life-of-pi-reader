@@ -1,0 +1,801 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Life of Pi · Ch.58–81 双语阅读器</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;1,400&family=Noto+Serif+SC:wght@300;400;600&family=EB+Garamond:ital,wght@0,400;1,400&family=Noto+Sans+SC:wght@300;400&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0f0e0b;--bg2:#161410;--bg3:#1e1b16;
+  --gold:#c8a96e;--gold2:#e8c98a;--rust:#9b4a2a;--ocean:#2a5c7a;--ocean2:#3a7a9a;
+  --text:#e8e0d0;--text2:#a09880;--text3:#6a6050;
+  --border:rgba(200,169,110,0.13);--border2:rgba(200,169,110,0.25);
+  --hi-v:rgba(200,169,110,0.22);--hi-i:rgba(155,74,42,0.22);--hi-c:rgba(42,92,122,0.22);
+  --font-en:'EB Garamond',serif;--font-zh:'Noto Serif SC',serif;--font-ui:'Noto Sans SC',sans-serif;
+  --font-d:'Playfair Display',serif;--sidebar:250px;
+}
+.light{--bg:#f4efe6;--bg2:#ede7da;--bg3:#e4ddd0;--text:#1e1a14;--text2:#5a4e3a;--text3:#8a7a62;--border:rgba(80,60,20,0.12);--gold:#7a4e10;--gold2:#9a6a20;--ocean:#0a3a5a;--ocean2:#1a5a7a;}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{background:var(--bg);color:var(--text);font-family:var(--font-ui);min-height:100vh;transition:background .4s,color .4s;}
+
+/* TOPBAR */
+.topbar{position:fixed;top:0;left:0;right:0;z-index:200;height:50px;background:var(--bg2);border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px;padding:0 18px;}
+.tb-title{font-family:var(--font-d);font-style:italic;font-size:1rem;color:var(--gold);flex:1;}
+.tb-title span{font-style:normal;font-family:var(--font-zh);font-size:.68rem;color:var(--text3);margin-left:8px;}
+.tb-btn{background:none;border:1px solid var(--border);color:var(--text2);padding:4px 11px;border-radius:14px;font-size:.7rem;font-family:var(--font-ui);cursor:pointer;transition:all .2s;white-space:nowrap;}
+.tb-btn:hover,.tb-btn.on{border-color:var(--gold);color:var(--gold);}
+.mode-pill{display:flex;background:var(--bg3);border:1px solid var(--border);border-radius:14px;padding:2px;gap:2px;}
+.mp{padding:3px 9px;border-radius:12px;font-size:.66rem;cursor:pointer;border:none;background:none;color:var(--text3);font-family:var(--font-ui);transition:all .2s;}
+.mp.on{background:var(--bg2);color:var(--gold);border:1px solid var(--border);}
+
+/* LAYOUT */
+.app{display:flex;padding-top:50px;}
+.sidebar{width:var(--sidebar);min-width:var(--sidebar);background:var(--bg2);border-right:1px solid var(--border);position:fixed;top:50px;left:0;bottom:0;overflow-y:auto;z-index:100;display:flex;flex-direction:column;transition:transform .35s cubic-bezier(.4,0,.2,1);}
+.sidebar.hidden{transform:translateX(-100%);}
+
+/* SIDEBAR CONTENT */
+.sb-sec{padding:12px 14px;border-bottom:1px solid var(--border);}
+.sb-lbl{font-size:.62rem;letter-spacing:.12em;text-transform:uppercase;color:var(--text3);margin-bottom:8px;}
+.batch-row{display:flex;flex-direction:column;gap:6px;}
+.batch-info{font-size:.68rem;color:var(--text3);line-height:1.5;}
+.prog-bar{height:3px;background:var(--bg3);border-radius:2px;overflow:hidden;margin:2px 0;}
+.prog-fill{height:100%;background:linear-gradient(90deg,var(--gold),var(--gold2));border-radius:2px;transition:width .4s;}
+.action-btn{background:linear-gradient(135deg,var(--gold),var(--gold2));color:#1a1200;border:none;padding:7px 12px;border-radius:6px;font-family:var(--font-ui);font-weight:600;font-size:.73rem;cursor:pointer;transition:all .2s;}
+.action-btn:hover{transform:translateY(-1px);box-shadow:0 4px 14px rgba(200,169,110,.3);}
+.action-btn:disabled{opacity:.4;cursor:not-allowed;transform:none;box-shadow:none;}
+.ghost-btn{background:none;border:1px solid var(--border2);color:var(--text2);padding:6px 12px;border-radius:6px;font-family:var(--font-ui);font-size:.7rem;cursor:pointer;transition:all .2s;}
+.ghost-btn:hover{border-color:var(--gold);color:var(--gold);}
+
+/* CHAPTER LIST */
+.ch-list{flex:1;overflow-y:auto;padding:6px 0;}
+.ch-item{display:flex;align-items:center;gap:7px;padding:7px 14px;cursor:pointer;font-size:.76rem;color:var(--text2);transition:background .15s;border-left:2px solid transparent;}
+.ch-item:hover{background:rgba(200,169,110,.07);}
+.ch-item.active{background:rgba(200,169,110,.1);border-left-color:var(--gold);color:var(--gold);}
+.ch-item.cached .ch-name::after{content:' ✓';font-size:.58rem;color:var(--gold);opacity:.8;}
+.ch-item.processing .ch-name::after{content:' ⟳';font-size:.58rem;color:var(--ocean2);animation:spin 1s linear infinite;}
+@keyframes spin{to{transform:rotate(360deg);}}
+.ch-name{flex:1;}
+
+/* NOTES SIDEBAR */
+.note-card{background:var(--bg3);border-radius:6px;padding:9px 11px;margin:5px 0;border-left:2px solid var(--gold);}
+.nc-q{font-family:var(--font-en);font-style:italic;font-size:.7rem;color:var(--text3);margin-bottom:3px;line-height:1.4;}
+.nc-t{font-family:var(--font-zh);font-size:.78rem;color:var(--text);line-height:1.5;}
+.nc-del{float:right;background:none;border:none;color:var(--text3);cursor:pointer;font-size:.68rem;}
+.nc-del:hover{color:var(--rust);}
+
+/* READER */
+.reader{flex:1;margin-left:var(--sidebar);padding:28px 0 80px;transition:margin-left .35s;}
+.reader.wide{margin-left:0;}
+.reader-inner{max-width:840px;margin:0 auto;padding:0 24px;}
+
+/* WELCOME */
+.welcome{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:70vh;text-align:center;gap:14px;}
+.wt{font-family:var(--font-d);font-style:italic;font-size:2.4rem;color:var(--gold);line-height:1.2;}
+.ws{font-family:var(--font-zh);color:var(--text3);font-size:.88rem;line-height:1.9;}
+.wbadge{display:inline-block;background:var(--bg2);border:1px solid var(--border2);border-radius:20px;padding:6px 16px;font-size:.72rem;color:var(--gold2);margin-top:4px;}
+
+/* CHAPTER VIEW */
+.ch-title{text-align:center;padding:28px 0 20px;border-bottom:1px solid var(--border);margin-bottom:20px;}
+.ch-title h2{font-family:var(--font-d);font-style:italic;font-size:1.5rem;color:var(--gold);}
+.ch-title p{font-family:var(--font-zh);font-size:.75rem;color:var(--text3);margin-top:5px;}
+
+/* LEGEND */
+.legend{display:flex;gap:12px;flex-wrap:wrap;align-items:center;padding:9px 13px;background:var(--bg2);border-radius:7px;border:1px solid var(--border);margin-bottom:18px;}
+.leg{display:flex;align-items:center;gap:5px;font-size:.68rem;color:var(--text3);}
+.ld{width:8px;height:8px;border-radius:2px;}
+.ld.v{background:var(--hi-v);border:1px solid var(--gold);}
+.ld.i{background:var(--hi-i);border:1px solid var(--rust);}
+.ld.c{background:var(--hi-c);border:1px solid var(--ocean);}
+
+/* BILINGUAL */
+.bil-wrap{display:flex;flex-direction:column;}
+.para-pair{display:grid;grid-template-columns:1fr 1fr;border-bottom:1px solid var(--border);cursor:pointer;transition:background .15s;}
+.para-pair:last-child{border-bottom:none;}
+.para-pair:hover{background:rgba(200,169,110,.03);}
+.para-pair.sel{outline:2px solid var(--gold);outline-offset:-2px;border-radius:4px;}
+.p-en{padding:16px 20px;font-family:var(--font-en);font-size:1.03rem;line-height:1.85;color:var(--text);border-right:1px solid var(--border);}
+.p-zh{padding:16px 20px;font-family:var(--font-zh);font-size:.92rem;line-height:2;color:var(--text2);}
+.p-zh.loading{color:var(--text3);font-style:italic;font-size:.82rem;}
+.bil-wrap.s-en .para-pair{grid-template-columns:1fr;}
+.bil-wrap.s-en .p-zh{display:none;}
+.bil-wrap.s-en .p-en{border-right:none;}
+.bil-wrap.s-zh .para-pair{grid-template-columns:1fr;}
+.bil-wrap.s-zh .p-en{display:none;}
+
+/* ANNOTATIONS */
+.an{border-radius:2px;padding:0 1px;cursor:pointer;transition:filter .15s;}
+.an.v{background:var(--hi-v);border-bottom:1px solid var(--gold);}
+.an.i{background:var(--hi-i);border-bottom:1px solid var(--rust);}
+.an.c{background:var(--hi-c);border-bottom:1px solid var(--ocean);}
+.an:hover{filter:brightness(1.6);}
+
+/* PROCESSING STATE */
+.ch-proc{background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:36px;text-align:center;margin:16px 0;}
+.ch-proc p{font-family:var(--font-en);font-style:italic;color:var(--text3);margin-top:12px;font-size:.88rem;}
+
+/* FONT SIZE */
+.fs-sm .p-en{font-size:.9rem;} .fs-sm .p-zh{font-size:.82rem;}
+.fs-lg .p-en{font-size:1.13rem;} .fs-lg .p-zh{font-size:1rem;}
+
+/* REVIEW */
+.review-box{margin-top:28px;background:var(--bg2);border:1px solid var(--border);border-radius:9px;overflow:hidden;}
+.rb-head{padding:14px 18px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;}
+.rb-head h3{font-family:var(--font-zh);color:var(--gold);font-size:.88rem;font-weight:600;}
+.rb-body{padding:18px 22px;font-family:var(--font-zh);font-size:.9rem;line-height:2;color:var(--text);}
+.rb-ph{color:var(--text3);font-style:italic;font-family:var(--font-en);font-size:.84rem;}
+
+/* POPUP */
+.popup{position:fixed;z-index:600;background:var(--bg3);border:1px solid var(--gold);border-radius:9px;padding:13px 16px;max-width:290px;box-shadow:0 8px 36px rgba(0,0,0,.5);display:none;animation:popIn .15s ease;}
+.popup.show{display:block;}
+@keyframes popIn{from{opacity:0;transform:scale(.95) translateY(4px);}to{opacity:1;transform:scale(1) translateY(0);}}
+.pw{font-family:var(--font-en);font-style:italic;font-size:.98rem;color:var(--gold2);margin-bottom:4px;}
+.pt{display:inline-block;font-size:.58rem;letter-spacing:.1em;text-transform:uppercase;padding:2px 6px;border-radius:8px;margin-bottom:6px;}
+.pt.v{background:rgba(200,169,110,.2);color:var(--gold);}
+.pt.i{background:rgba(155,74,42,.2);color:#e07050;}
+.pt.c{background:rgba(42,92,122,.2);color:var(--ocean2);}
+.pm{font-family:var(--font-zh);font-size:.84rem;color:var(--text);line-height:1.7;margin-bottom:4px;}
+.pe{font-family:var(--font-en);font-size:.76rem;font-style:italic;color:var(--text3);line-height:1.5;}
+
+/* NOTE FLOAT */
+.nf{position:fixed;bottom:22px;right:22px;z-index:300;background:var(--bg3);border:1px solid var(--gold);border-radius:11px;padding:13px 15px;width:270px;box-shadow:0 8px 36px rgba(0,0,0,.5);display:none;}
+.nf.show{display:block;animation:popIn .2s ease;}
+.nf-q{font-family:var(--font-en);font-style:italic;font-size:.7rem;color:var(--text3);margin-bottom:7px;line-height:1.4;}
+.nf-ta{width:100%;background:var(--bg2);border:1px solid var(--border);border-radius:5px;color:var(--text);font-family:var(--font-zh);font-size:.82rem;line-height:1.6;padding:9px 11px;resize:none;height:75px;outline:none;transition:border-color .2s;}
+.nf-ta:focus{border-color:var(--gold);}
+.nf-row{display:flex;justify-content:flex-end;gap:8px;margin-top:7px;}
+.nf-cancel{background:none;border:none;color:var(--text3);font-size:.72rem;cursor:pointer;font-family:var(--font-ui);}
+.nf-save{background:var(--gold);color:#1a1200;border:none;padding:5px 12px;border-radius:5px;font-size:.72rem;font-weight:600;cursor:pointer;font-family:var(--font-ui);}
+
+/* DOTS */
+.dots{display:inline-flex;gap:4px;align-items:center;}
+.dots span{width:5px;height:5px;background:var(--gold);border-radius:50%;animation:db 1.2s infinite;}
+.dots span:nth-child(2){animation-delay:.2s;}
+.dots span:nth-child(3){animation-delay:.4s;}
+@keyframes db{0%,80%,100%{opacity:.2;transform:scale(.8);}40%{opacity:1;transform:scale(1);}}
+
+::-webkit-scrollbar{width:4px;}
+::-webkit-scrollbar-track{background:transparent;}
+::-webkit-scrollbar-thumb{background:var(--border2);border-radius:4px;}
+
+@media(max-width:640px){
+  .sidebar{width:100%;}
+  .reader{margin-left:0;}
+  .para-pair{grid-template-columns:1fr!important;}
+  .p-en{border-right:none!important;border-bottom:1px solid var(--border);}
+  .p-zh{display:block!important;}
+}
+
+/* ── BOOKMARK CARD ── */
+.bm-overlay{position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:800;display:none;align-items:center;justify-content:center;}
+.bm-overlay.show{display:flex;}
+.bm-modal{background:var(--bg2);border:1px solid var(--border);border-radius:14px;padding:24px;width:440px;max-width:95vw;}
+.bm-modal h3{font-family:var(--font-zh);color:var(--gold);font-size:.95rem;margin-bottom:16px;}
+.bm-styles{display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap;}
+.bm-style-btn{padding:5px 12px;border-radius:16px;font-size:.7rem;cursor:pointer;border:1px solid var(--border);background:var(--bg3);color:var(--text2);font-family:var(--font-ui);transition:all .2s;}
+.bm-style-btn.on{border-color:var(--gold);color:var(--gold);background:rgba(200,169,110,.1);}
+.bm-preview{border-radius:10px;overflow:hidden;margin-bottom:14px;box-shadow:0 4px 24px rgba(0,0,0,.4);}
+.bm-preview canvas{display:block;width:100%;height:auto;}
+.bm-actions{display:flex;gap:8px;justify-content:flex-end;}
+.bm-cancel{background:none;border:1px solid var(--border);color:var(--text2);padding:7px 16px;border-radius:6px;font-size:.78rem;cursor:pointer;font-family:var(--font-ui);}
+.bm-download{background:linear-gradient(135deg,var(--gold),var(--gold2));color:#1a1200;border:none;padding:7px 16px;border-radius:6px;font-size:.78rem;font-weight:600;cursor:pointer;font-family:var(--font-ui);}
+
+/* ── TEXT SELECTION ── */
+.p-en::selection,.p-zh::selection{background:rgba(200,169,110,.35);}
+.sel-toolbar{position:fixed;z-index:700;background:var(--bg3);border:1px solid var(--gold);border-radius:20px;padding:5px 10px;display:none;gap:8px;align-items:center;box-shadow:0 4px 20px rgba(0,0,0,.4);}
+.sel-toolbar.show{display:flex;}
+.sel-tb-btn{background:none;border:none;color:var(--text2);font-size:.72rem;cursor:pointer;font-family:var(--font-ui);padding:2px 6px;border-radius:10px;transition:all .2s;white-space:nowrap;}
+.sel-tb-btn:hover{background:rgba(200,169,110,.15);color:var(--gold);}
+
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="tb-title">Life of Pi <span>Ch.58–81 · 双语阅读器</span></div>
+  <div class="mode-pill" id="modePill">
+    <button class="mp on" onclick="setMode('both')" id="m-both">双语</button>
+    <button class="mp" onclick="setMode('en')" id="m-en">EN</button>
+    <button class="mp" onclick="setMode('zh')" id="m-zh">中文</button>
+  </div>
+  <button class="tb-btn" onclick="cycleFont()" id="fontBtn">字号</button>
+  <button class="tb-btn" onclick="toggleTheme()" id="themeBtn">🌙</button>
+  <button class="tb-btn on" onclick="toggleSidebar()" id="sbBtn">☰ 目录</button>
+</div>
+
+<div class="popup" id="popup">
+  <div class="pw" id="pw"></div>
+  <span class="pt" id="pt"></span>
+  <div class="pm" id="pm"></div>
+  <div class="pe" id="pe"></div>
+</div>
+
+<div class="nf" id="nf">
+  <div class="nf-q" id="nfQ"></div>
+  <textarea class="nf-ta" id="nfTa" placeholder="写下你的想法..."></textarea>
+  <div class="nf-row">
+    <button class="nf-cancel" onclick="closeNF()">取消</button>
+    <button class="nf-save" onclick="saveNote()">保存</button>
+  </div>
+</div>
+
+
+<!-- BOOKMARK OVERLAY -->
+<div class="bm-overlay" id="bmOverlay" onclick="closeBM(event)">
+  <div class="bm-modal" onclick="event.stopPropagation()">
+    <h3>✦ 生成书摘卡片</h3>
+    <div class="bm-styles" id="bmStyles">
+      <button class="bm-style-btn on" onclick="setBMStyle('dark',this)">深夜</button>
+      <button class="bm-style-btn" onclick="setBMStyle('warm',this)">暖纸</button>
+      <button class="bm-style-btn" onclick="setBMStyle('ocean',this)">海洋</button>
+      <button class="bm-style-btn" onclick="setBMStyle('minimal',this)">极简</button>
+    </div>
+    <div class="bm-preview"><canvas id="bmCanvas" width="800" height="500"></canvas></div>
+    <div class="bm-actions">
+      <button class="bm-cancel" onclick="closeBM()">取消</button>
+      <button class="bm-download" onclick="downloadBM()">⬇ 保存图片</button>
+    </div>
+  </div>
+</div>
+
+<!-- SELECTION TOOLBAR -->
+<div class="sel-toolbar" id="selToolbar">
+  <span style="font-size:.65rem;color:var(--text3);font-family:var(--font-ui)">划线</span>
+  <button class="sel-tb-btn" onclick="makeBookmark()">✦ 书摘卡片</button>
+  <button class="sel-tb-btn" onclick="highlightSelection()">🖊 标注</button>
+</div>
+
+<div class="app">
+  <div class="sidebar" id="sidebar">
+
+    <div class="sb-sec">
+      <div class="sb-lbl">批量处理</div>
+      <div class="batch-row">
+        <div class="batch-info" id="batchInfo">选择章节后开始处理</div>
+        <div class="prog-bar"><div class="prog-fill" id="progFill" style="width:0%"></div></div>
+        <button class="action-btn" id="procBtn" onclick="batchProcess()">⚡ 处理选中章节</button>
+        <button class="ghost-btn" id="selAllBtn" onclick="toggleSelAll()">全选</button>
+        <button class="ghost-btn" style="color:#c05040;border-color:#c05040;margin-top:2px" onclick="clearAndReprocess()">🗑 清除缓存重处理</button>
+        <div style="font-size:.62rem;color:var(--text3);line-height:1.5">处理后本地缓存，下次离线可读</div>
+      </div>
+    </div>
+
+    <div style="padding:10px 14px 4px;font-size:.62rem;letter-spacing:.12em;text-transform:uppercase;color:var(--text3);">章节 58–81</div>
+    <div class="ch-list" id="chList"></div>
+
+    <div class="sb-sec" style="border-top:1px solid var(--border);border-bottom:none;">
+      <div class="sb-lbl">我的笔记 <span id="noteCnt" style="color:var(--gold)"></span></div>
+      <div id="notesList"></div>
+    </div>
+
+  </div>
+
+  <div class="reader" id="reader">
+    <div class="reader-inner" id="readerInner">
+      <div class="welcome" id="welcome">
+        <div class="wt">Life of Pi</div>
+        <div class="ws">少年Pi的奇幻漂流 · 第58–81章<br>点击左侧章节开始阅读</div>
+        <div class="wbadge">⚡ 首次读取需联网处理 · 之后永久离线缓存</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+
+// ── BOOK DATA (embedded) ──
+const BOOK_DATA = [{"num": 58, "paragraphs": ["I pulled out the survival manual. Its pages were still wet. I turned them carefully. The\nmanual was written by a British Royal Navy commander. It contained a wealth of\npractical information on surviving at sea after a shipwreck. It included survival tips such\nas:\nAlways read instructions carefully.\nDo not drink urine. Or sea water. Or bird blood.\nDo not eat jellyfish. Or fish that are armed with spikes. Or that have parrot-like beaks. Or\nthat puff up like balloons.\nPressing the eyes of fish will paralyze them.\nThe body can be a hero in battle. If a castaway is injured, beware of well-meaning but illfounded medical treatment. Ignorance is the worst doctor, while rest and sleep are the\nbest nurses.\nPut up your feet at least five minutes every hour.\nUnnecessary exertion should be avoided. But an idle mind tends to sink, so the mind\nshould be kept occupied with whatever light distraction may suggest itself. Playing card\ngames, Twenty Questions and I Spy With My Little Eye are excellent forms of simple\nrecreation. Community singing is another sure-fire way to lift the spirits. Yarn spinning is\nalso highly recommended.\nGreen water is shallower than blue water.\nBeware of far-off clouds that look like mountains. Look for green. Ultimately, a foot is\nthe only good judge of land.", "Do not go swimming. It wastes energy. Besides, a survival craft may drift faster than you\ncan swim. Not to mention\nthe danger of sea life. If you are hot, wet your clothes instead.\nDo not urinate in your clothes. The momentary warmth is not worth the nappy rash.\nShelter yourself. Exposure can kill faster than thirst or hunger.\nSo long as no excessive water is lost through perspiration, the body can survive up to\nfourteen days without water. If\nyou feel thirsty, suck a button.\nTurtles are an easy catch and make for excellent meals. Their blood is a good, nutritious,\nsalt-free drink; their\nflesh is tasty and filling; their fat has many uses; and the castaway will find turtle eggs a\nreal treat. Mind the beak\nand the claws.\nDon't let your morale flag. Be daunted, but not defeated. Remember: the spirit, above all\nelse, counts. If you have\nthe will to live, you will. Good luck!", "There were also a few highly cryptic lines distilling the art and science of navigation. I\nlearned that the horizon, as seen from a height of five feet on a calm day, was two and a\nhalf miles away.\nThe injunction not to drink urine was quite unnecessary. No one called \"Pissing\" in his\nchildhood would be caught dead with a cup of pee at his lips, even alone in a lifeboat in\nthe middle of the Pacific. And the gastronomic suggestions only confirmed to my mind\nthat the English didn't know the meaning of the word food. Otherwise, the manual was a\nfascinating pamphlet on how to avoid being pickled in brine. Only one important topic\nwas not addressed: the establishing of alpha-omega relationships with major lifeboat\npests.\nI had to devise a training program for Richard Parker. I had to make him understand that I\nwas the top tiger and that his territory was limited to the floor of the boat, the stern bench\nand the side benches as far as the middle cross bench. I had to fix in his mind that the top\nof the tarpaulin and the bow of the boat, bordered by the neutral territory of the middle\nbench, was my territory and utterly forbidden to him.\nI had to start fishing very soon. It would not take long for Richard Parker to finish the\nanimal carcasses. At the zoo the adult lions and tigers ate on average ten pounds of meat\na day.", "There were many other things I had to do. I had to find a means of sheltering myself. If\nRichard Parker stayed under the tarpaulin all the time, it was for a good reason. To be\ncontinuously outside, exposed to sun, wind, rain and sea, was exhausting, and not only to\nthe body but also to the mind. Hadn't I just read that exposure could inflict a quick death?\nI had to devise some sort of canopy.\nI had to tie the raft to the lifeboat with a second rope, in case the first should break or\nbecome loose.\nI had to improve the raft. At present it was seaworthy, but hardly habitable. I would have\nto make it fit for living in until I could move to my permanent quarters on the lifeboat.\nFor example, I had to find a way to stay dry on it. My skin was wrinkled and swollen all\nover from being constantly wet. That had to change. And I had to find a way to store\nthings on the raft.\nI had to stop hoping so much that a ship would rescue me. I should not count on outside\nhelp. Survival had to start with me. In my experience, a castaway's worst mistake is to\nhope too much and do too little. Survival starts by paying attention to what is close at\nhand and immediate. To look out with idle hope is tantamount to dreaming one's life\naway.\nThere was much I had to do.\nI looked out at the empty horizon. There was so much water. And I was all alone. All\nalone.\nI burst into hot tears. I buried my face in my crossed arms and sobbed. My situation was\npatently hopeless."]}, {"num": 59, "paragraphs": ["Alone or not, lost or not, I was thirsty and hungry. I pulled on the rope. There was a slight\ntension. As soon as I lessened my grip on it, it slid out, and the distance between the\nlifeboat and the raft increased. So the lifeboat drifted faster than the raft, pulling it along.\nI noted the fact without thinking anything of it. My mind was more focused on the doings\nof Richard Parker.\nBy the looks of it, he was under the tarpaulin.\nI pulled the rope till I was right next to the bow. I reached up to the gunnel. As I was\ncrouched, preparing myself for a quick raid on the locker, a series of waves got me\nthinking. I noticed that with the raft next to it, the lifeboat had changed directions. It was\nno longer perpendicular to the waves but broadside to them and was beginning to roll", "from side to side, that rolling that was so unsettling for the stomach. The reason for this\nchange became clear to me: the raft, when let out, was acting as a sea anchor, as a drag\nthat pulled on the lifeboat and turned its bow to face the waves. You see, waves and\nsteady winds are usually perpendicular to each other. So, if a boat is pushed by a wind\nbut held back by a sea anchor, it will turn until it offers the least resistance to the wind—\nthat is, until it is in line with it and at right angles to the waves, which makes for a frontto-back pitching that is much more comfortable than a side-to-side rolling. With the raft\nnext to the boat, the dragging effect was gone, and there was nothing to steer the boat\nhead into the wind. Therefore it turned broadside and rolled.\nWhat may seem like a detail to you was something which would save my life and which\nRichard Parker would come to regret.\nAs if to confirm my fresh insight, I heard him growl. It was a disconsolate growl, with\nsomething indefinably green and queasy in its tone. He was maybe a good swimmer, but\nhe was not much of a sailor.\nI had a chance yet.\nLest I got cocky about my abilities to manipulate him, I received at that moment a quiet\nbut sinister warning about what I was up against. It seemed Richard Parker was such a\nmagnetic pole of life, so charismatic in his vitality, that other expressions of life found it\nintolerable. I was on the point of raising myself over the bow when I heard a gentle\nthrashing buzz. I saw something small land in the water next to me.\nIt was a cockroach. It floated for a second or two before being swallowed by an\nunderwater mouth. Another cockroach landed in the water. In the next minute, ten or so\ncockroaches plopped into the water on either side of the bow. Each was claimed by a fish.\nThe last of the foreign life forms was abandoning ship.\nI carefully brought my eyes over the gunnel. The first thing I saw, lying in a fold of the\ntarpaulin above the bow bench, was a large cockroach, perhaps the patriarch of the clan. I\nwatched it, strangely interested. When it decided it was time, it deployed its wings, rose\nin the air with a minute clattering, hovered above the lifeboat momentarily, as if making\nsure no one had been left behind, and then veered overboard to its death.\nNow we were two. In five days the populations of orang-utans, zebras, hyenas, rats, flies\nand cockroaches had been wiped out. Except for the bacteria and worms that might still\nbe alive in the remains of the animals, there was no other life left on the lifeboat but\nRichard Parker and me.\nIt was not a comforting thought.\nI lifted myself and breathlessly opened the locker lid. I deliberately did not look under the\ntarpaulin for fear that looking would be like shouting and would attract Richard Parker's", "attention. Only once the lid was leaning against the tarpaulin did I dare let my senses\nconsider what was beyond it.\nA smell came to my nose, a musky smell of urine, quite sharp, what every cat cage in a\nzoo smells of. Tigers are highly territorial, and it is with their urine that they mark the\nboundaries of their territory. Here was good news wearing a foul dress: the odour was\ncoming exclusively from below the tarpaulin. Richard Parker's territorial claims seemed\nto be limited to the floor of the boat. This held promise. If I could make the tarpaulin\nmine, we might get along.\nI held my breath, lowered my head and cocked it to the side to see beyond the edge of the\nlid. There was rainwater, about four inches of it, sloshing about the floor of the lifeboat—\nRichard Parker's own freshwater pond. He was doing exactly what I would be doing in\nhis place: cooling off in the shade. The day was getting beastly hot. He was flat on the\nfloor of the boat, facing away from me, his hind legs sticking straight back and splayed\nout, back paws facing up, and stomach and inner thighs lying directly against the floor.\nThe position looked silly but was no doubt very pleasant.\nI returned to the business of survival. I opened a carton of emergency ration and ate my\nfill, about one-third of the package. It was remarkable how little it took to make my\nstomach feel full. I was about to drink from the rain-catcher pouch slung across my\nshoulder when my eyes fell upon the graduated drinking beakers. If I couldn't go for a dip,\ncould I at least have a sip? My own supplies of water would not last forever. I took hold\nof one of the beakers, leaned over, lowered the lid just as much as I needed to and\ntremulously dipped the beaker into Parker's Pond, four feet from his back paws. His\nupturned pads with their wet fur looked like little desert islands surrounded by seaweed.\nI brought back a good 500 millilitres. It was a little discoloured. Specks were floating in it.\nDid I worry about ingesting some horrid bacteria? I didn't even think about it. All I had\non my mind was my thirst. I drained that beaker to the dregs with great satisfaction.\nNature is preoccupied with balance, so it did not surprise me that nearly right away I felt\nthe urge to urinate. I relieved myself in the beaker. I produced so exactly the amount I\nhad just downed that it was as if a minute hadn't passed and I were still considering\nRichard Parker's rainwater. I hesitated. I felt the urge to tilt the beaker into my mouth\nonce more. I resisted the temptation. But it was hard. Mockery be damned, my urine\nlooked delicious! I was not suffering yet from dehydration, so the liquid was pale in\ncolour. It glowed in the sunlight, looking like a glass of apple juice. And it was\nguaranteed fresh, which certainly couldn't be said of the canned water that was my staple.\nBut I heeded my better judgment. I splashed my urine on the tarpaulin and over the\nlocker lid to stake my claim.\nI stole another two beakers of water from Richard Parker, without urinating this time. I\nfelt as freshly watered as a potted plant.", "Now it was time to improve my situation. I turned to the contents of the locker and the\nmany promises they held.\nI brought out a second rope and tethered the raft to the lifeboat with it.\nI discovered what a solar still is. A solar still is a device to produce fresh water from salt\nwater. It consists of an inflatable transparent cone set upon a round lifebuoy-like\nbuoyancy chamber that has a surface of black rubberized canvas stretched across its\ncentre. The still operates on the principle of distillation: sea water lying beneath the\nsealed cone on the black canvas is heated by the sun and evaporates, gathering on the\ninside surface of the cone. This salt-free water trickles down and collects in a gully on the\nperimeter of the cone, from which it drains into a pouch. The lifeboat came equipped\nwith twelve solar stills. I read the instructions carefully, as the survival manual told me to.\nI inflated all twelve cones with air and I filled each buoyancy chamber with the requisite\nten litres of sea water. I strung the stills together, tying one end of the flotilla to the\nlifeboat and the other to the raft, which meant that not only would I not lose any stills\nshould one of my knots become loose, but also that I had, in effect, a second emergency\nrope to keep me tethered to the lifeboat. The stills looked pretty and very technological as\nthey floated on the water, but they also looked flimsy, and I was doubtful of their\ncapacity to produce fresh water.\nI directed my attention to improving the raft. I examined every knot that held it together,\nmaking sure each was tight and secure. After some thought, I decided to transform the\nfifth oar, the footrest oar, into a mast of sorts. I undid the oar. With the sawtoothed edge\nof the hunting knife I painstakingly cut a notch into it, about halfway down, and with the\nknife's point I drilled three holes through its flat part. Work was slow but satisfying. It\nkept my mind busy. When I had finished I lashed the oar in a vertical position to the\ninside of one of the corners of the raft, flat part, the masthead, rising in the air, handle\ndisappearing underwater. I ran the rope tightly into the notch, to prevent the oar from\nslipping down. Next, to ensure that the mast would stand straight, and to give myself\nlines from which to hang a canopy and supplies, I threaded ropes through the holes I had\ndrilled in the masthead and tied them to the tips of the horizontal oars. I strapped the life\njacket that had been attached to the footrest oar to the base of the mast. It would play a\ndouble role: it would provide extra flotation to compensate for the vertical weight of the\nmast, and it would make for a slightly raised seat for me.\nI threw a blanket over the lines. It slid down. The angle of the lines was too steep. I\nfolded the lengthwise edge of the blanket over once, cut two holes midway down, about a\nfoot apart, and linked the holes with a piece of string, which I made by unweaving a\nlength of rope. I threw the blanket over the lines again, with the new girdle string going\naround the masthead. I now had a canopy.\nIt took me a good part of the day to fix up the raft. There were so many details to look\nafter. The constant motion of the sea, though gentle, didn't make my work any easier.\nAnd I had to keep an eye on Richard Parker. The result was no galleon. The mast, so\ncalled, ended hardly a few inches above my head. As for the deck, it was just big enough", "to sit on cross-legged or to lie on in a tight, nearly-to-term fetal position. But I wasn't\ncomplaining. It was seaworthy and it would save me from Richard Parker.", "By the time I had finished my work, the afternoon was nearing its end. I gathered a can of\nwater, a can opener, four biscuits of survival ration and four blankets. I closed the locker\n(very softly this time), sat down on the raft and let out the rope. The lifeboat drifted away.\nThe main rope tensed, while the security rope, which I had deliberately measured out\nlonger, hung limply. I laid two blankets beneath me, carefully folding them so that they\ndidn't touch the water. I wrapped the other two around my shoulders and rested my back\nagainst the mast. I enjoyed the slight elevation I gained from sitting on the extra life\njacket. I was hardly higher up from the water than one would be from a floor sitting on a\nthick cushion; still, I hoped not to get wet so much.\nI enjoyed my meal as I watched the sun's descent in a cloudless sky. It was a relaxing\nmoment. The vault of the world was magnificently tinted. The stars were eager to\nparticipate; hardly had the blanket of colour been pulled a little than they started to shine\nthrough the deep blue. The wind blew with a faint, warm breeze and the sea moved about\nkindly, the water peaking and troughing like people dancing in a circle who come\ntogether and raise their hands and move apart and come together again, over and over.\nRichard Parker sat up. Only his head and a little of his shoulders showed above the\ngunnel. He looked out. I shouted, \"Hello, Richard Parker!\" and I waved. He looked at me.\nHe snorted or sneezed, neither word quite captures it. Prusten again. What a stunning\ncreature. Such a noble mien. How apt that in full it is a Royal Bengal tiger. I counted\nmyself lucky in a way. What if I had ended up with a creature that looked silly or ugly, a\ntapir or an ostrich or a flock of turkeys? That would have been a more trying\ncompanionship in some ways.\nI heard a splash. I looked down at the water. I gasped. I thought I was alone. The stillness\nin the air, the glory of the light, the feeling of comparative safety—all had made me think\nso. There is commonly an element of silence and solitude to peace, isn't there? It's hard to\nimagine being at peace in a busy subway station, isn't it? So what was all this commotion?\nWith just one glance I discovered that the sea is a city. Just below me, all around,\nunsuspected by me, were highways, boulevards, streets and roundabouts bustling with\nsubmarine traffic. In water that was dense, glassy and flecked by millions of lit-up specks\nof plankton, fish like trucks and buses and cars and bicycles and pedestrians were madly\nracing about, no doubt honking and hollering at each other. The predominant colour was\ngreen. At multiple depths, as far as I could see, there were evanescent trails of\nphosphorescent green bubbles, the wake of speeding fish. As soon as one trail faded,\nanother appeared. These trails came from all directions and disappeared in all directions.\nThey were like those time-exposure photographs you see of cities at night, with the long\nred streaks made by the tail lights of cars. Except that here the cars were driving above\nand under each other as if they were on interchanges that were stacked ten storeys high.\nAnd here the cars were of the craziest colours. The dorados—there must have been over", "fifty patrolling beneath the raft—showed off their bright gold, blue and green as they\nwhisked by. Other fish that I could not identify were yellow, brown, silver, blue, red,\npink, green, white, in all kinds of combinations, solid, streaked and speckled. Only the\nsharks stubbornly refused to be colourful. But whatever the size or colour of a vehicle,\none thing was constant: the furious driving. There were many collisions—all involving\nfatalities, I'm afraid—and a number of cars spun wildly out of control and collided\nagainst barriers, bursting above the surface of the water and splashing down in showers\nof luminescence. I gazed upon this urban hurly-burly like someone observing a city from\na hot-air balloon. It was a spectacle wondrous and awe-inspiring. This is surely what\nTokyo must look like at rush hour.\nI looked on until the lights went out in the city.\nFrom the Tsimtsum all I had seen were dolphins. I had assumed that the Pacific, but for\npassing schools of fish, was a sparsely inhabited waste of water. I have learned since that\ncargo ships travel too quickly for fish. You are as likely to see sea life from a ship as you\nare to see wildlife in a forest from a car on a highway. Dolphins, very fast swimmers,\nplay about boats and ships much like dogs chase cars: they race along until they can no\nlonger keep up. If you want to see wildlife, it is on foot, and quietly, that you must\nexplore a forest. It is the same with the sea. You must stroll through the Pacific at a\nwalking pace, so to speak, to see the wealth and abundance that it holds.\nI settled on my side. For the first time in five days I felt a measure of calm. A little bit of\nhope—hard earned, well deserved, reasonable—glowed in me. I fell asleep."]}, {"num": 60, "paragraphs": ["I awoke once during the night. I pushed the canopy aside and looked out. The moon was\na sharply defined crescent and the sky\nwas perfectly clear. The stars shone with such fierce, contained brilliance that it seemed\nabsurd to call the night dark. The sea lay quietly, bathed in a shy, light-footed light, a\ndancing play of black and silver that extended without limits all about me. The volume of\nthings was confounding—the volume of air above me, the volume of water around and\nbeneath me. I was half-moved, half-terrified. I felt like the sage Markandeya, who fell out\nof Vishnu's mouth while Vishnu was sleeping and so beheld the entire universe,\neverything that there is. Before the sage could die of fright, Vishnu awoke and took him\nback into his mouth. For the first time I noticed—as I would notice repeatedly during my\nordeal, between one throe of agony and the next—that my suffering was taking place in a\ngrand setting. I saw my suffering for what it was, finite and insignificant, and I was still.\nMy suffering did not fit anywhere, I realized. And I could accept this. It was all right. (It\nwas daylight that brought my protest: \"No! No! No! My suffering does matter. I want to\nlive! I can't help but mix my life with that of the universe. Life is a peephole, a single tiny\nentry onto a vastness—how can I not dwell on this brief, cramped view I have of things?", "This peephole is all I've got!\") I mumbled words of Muslim prayer and went back to\nsleep."]}, {"num": 61, "paragraphs": ["The next morning I was not too wet and I was feeling strong. I thought this was\nremarkable considering the strain I was under and how little I had eaten in the last several\ndays.\nIt was a fine day. I decided to try my hand at fishing, for the first time in my life. After a\nbreakfast of three biscuits and one can of water, I read what the survival manual had to\nsay on the subject. The first problem arose: bait. I thought about it. There were the dead\nanimals, but stealing food from under a tiger's nose was a proposition I was not up to. He\nwould not realize that it was an investment that would bring him an excellent return. I\ndecided to use my leather shoe. I had only one left. The other I had lost when the ship\nsank.\nI crept up to the lifeboat and I gathered from the locker one of the fishing kits, the knife\nand a bucket for my catch. Richard Parker was lying on his side. His tail jumped to life\nwhen I was at the bow but his head did not lift. I let the raft out.\nI attached a hook to a wire leader, which I tied to a line. I added some lead weights. I\npicked three that had an intriguing torpedo shape. I removed my shoe and cut it into\npieces. It was hard work; the leather was tough. I carefully worked the hook into a flat\npiece of hide, not through it but into it, so that the point of the hook was hidden. I let the\nline down deep. There had been so many fish the previous evening that I expected easy\nsuccess.\nI had none. The whole shoe disappeared bit by bit, slight tug on the line by slight tug on\nthe line, happy freeloading fish by happy freeloading fish, bare hook by bare hook, until I\nwas left with only the rubber sole and the shoelace. When the shoelace proved an\nunconvincing earthworm, out of sheer exasperation I tried the sole, all of it. It was not a\ngood idea. I felt a slight, promising tug and then the line was unexpectedly light. All I\npulled in was line. I had lost the whole tackle.\nThis loss did not strike me as a terrible blow. There were other hooks, leader wires and\nweights in the kit, besides a whole other kit. And I wasn't even fishing for myself. I had\nplenty of food in store.\nStill, a part of my mind—the one that says what we don't want to hear—rebuked me.\n\"Stupidity has a price. You should show more care and wisdom next time.\"", "Later that morning a second turtle appeared. It came right up to the raft. It could have\nreached up and bit my bottom if it had wanted to. When it turned I reached for its hind\nflipper, but as soon as I touched it I recoiled in horror. The turtle swam away.\nThe same part of my mind that had rebuked me over my fishing fiasco scolded me again.\n\"What exactly do you intend to feed that tiger of yours? How much longer do you think\nhe'll last on three dead animals? Do I need to remind you that tigers are not carrion eaters?\nGranted, when he's on his last legs he probably won't lift his nose at much. But don't you\nthink that before he submits to eating puffy, putrefied zebra he'll try the fresh, juicy\nIndian boy just a short dip away? And how are we doing with the water situation? You\nknow how tigers get impatient with thirst. Have you smelled his breath recently? It's\npretty awful. That's a bad sign. Perhaps you're hoping that he'll lap up the Pacific and in\nquenching his thirst allow you to walk to America? Quite amazing, this limited capacity\nto excrete salt that Sundarbans tigers have developed. Comes from living in a tidal\nmangrove forest, I suppose. But it is a limited capacity. Don't they say that drinking too\nmuch saline water makes a man-eater of a tiger? Oh, look. Speak of the devil. There he is.\nHe's yawning. My, my, what an enormous pink cave. Look at those long yellow\nstalactites and stalagmites. Maybe today you'll get a chance to visit.\"\nRichard Parker's tongue, the size and colour of a rubber hot-water bottle, retreated and his\nmouth closed. He swallowed.\nI spent the rest of the day worrying myself sick. I stayed away from the lifeboat. Despite\nmy own dire predictions, Richard Parker passed the time calmly enough. He still had\nwater from the rainfall and he didn't seem too concerned with hunger. But he did make\nvarious tiger noises—growls and moans and the like—that did nothing to put me at ease.\nThe riddle seemed irresolvable: to fish I needed bait, but I would have bait only once I\nhad fish. What was I supposed to do? Use one of my toes? Cut off one of my ears?\nA solution appeared in the late afternoon in a most unexpected way. I had pulled myself\nup to the lifeboat. More than that: I had climbed aboard and was rummaging through the\nlocker, feverishly looking for an idea that would save my life. I had tied the raft so that it\nwas about six feet from the boat. I fancied that with a jump and a pull at a loose knot I\ncould save myself from Richard Parker. Desperation had pushed me to take such a risk.\nFinding nothing, no bait and no new idea, I sat up—only to discover that I was dead\ncentre in the focus of his stare. He was at the other end of the lifeboat, where the zebra\nused to be, turned my way and sitting up, looking as if he'd been patiently waiting for me\nto notice him. How was it that I hadn't heard him stir? What delusion was I under that I\nthought I could outwit him? Suddenly I was hit hard across the face. I cried out and\nclosed my eyes. With feline speed he had leapt across the lifeboat and struck me. I was to\nhave my face clawed off—this was the gruesome way I was to die. The pain was so\nsevere I felt nothing. Blessed be shock. Blessed be that part of us that protects us from\ntoo much pain and sorrow. At the heart of life is a ruse box. I whimpered, \"Go ahead,\nRichard Parker, finish me off. But please, what you must do, do it quickly. A blown fuse\nshould not be overtested.\"", "He was taking his time. He was at my feet, making noises. No doubt he had discovered\nthe locker and its riches. I fearfully opened an eye.\nIt was a fish. There was a fish in the locker. It was flopping about like a fish out of water.\nIt was about fifteen inches long and it had wings. A flying fish. Slim and dark grey-blue,\nwith dry, featherless wings and round, unblinking, yellowish eyes. It was this flying fish\nthat had struck me across the face, not Richard Parker. He was still fifteen feet away, no\ndoubt wondering what I was going on about. But he had seen the fish. I could read a keen\ncuriosity on his face. He seemed about ready to investigate.\nI bent down, picked up the fish and threw it towards him. This was the way to tame him!\nWhere a rat had gone, a flying fish would follow. Unfortunately, the flying fish flew. In\nmid-air, just ahead of Richard Parker's open mouth, the fish swerved and dropped into the\nwater. It happened with lightning speed. Richard Parker turned his head and snapped his\nmouth, jowls flapping, but the fish was too quick for him. He looked astonished and\ndispleased. He turned to me again. \"Where's my treat?\" his face seemed to inquire. Fear\nand sadness gripped me. I turned with the half-hearted, half-abandoned hope that I could\njump onto the raft before he could jump onto me.\nAt that precise instant there was a vibration in the air and we were struck by a school of\nflying fish. They came like a swarm of locusts. It was not only their numbers; there was\nalso something insect-like about the clicking, whirring sound of their wings. They burst\nout of the water, dozens of them at a time, some of them flick-flacking over a hundred\nyards through the air. Many dived into the water just before the boat. A number sailed\nclear over it. Some crashed into its side, sounding like firecrackers going off. Several\nlucky ones returned to the water after a bounce on the tarpaulin. Others, less fortunate,\nfell directly into the boat, where they started a racket of flapping and flailing and\nsplashing. And still others flew right into us. Standing unprotected as I was, I felt I was\nliving the martyrdom of Saint Sebastian. Every fish that hit me was like an arrow entering\nmy flesh. I clutched at a blanket to protect myself while also trying to catch some of the\nfish. I received cuts and bruises all over my body.\nThe reason for this onslaught became evident immediately: dorados were leaping out of\nthe water in hot pursuit of them. The much larger dorados couldn't match their flying, but\nthey were faster swimmers and their short lunges were very powerful. They could\novertake flying fish if they were just behind them and lunging from the water at the same\ntime and in the same direction. There were sharks too; they also leapt out of the water,\nnot so cleanly but with devastating consequence for some dorados. This aquatic mayhem\ndidn't last long, but while it did, the sea bubbled and boiled, fish jumped and jaws worked\nhard.\nRichard Parker was tougher than I was in the face of these fish, and far more efficient. He\nraised himself and went about blocking, swiping and biting all the fish he could. Many\nwere eaten live and whole, struggling wings beating in his mouth. It was a dazzling\ndisplay of might and speed. Actually, it was not so much the speed that was impressive as", "the pure animal confidence, the total absorption in the moment. Such a mix of ease and\nconcentration, such a being-in-the-present, would be the envy of the highest yogis.\nWhen it was over, the result, besides a very sore body for me, was six flying fish in the\nlocker and a much greater number in the lifeboat. I hurriedly wrapped a fish in a blanket,\ngathered a hatchet and made for the raft.\nI proceeded with great deliberation. The loss of my tackle that morning had had a\nsobering effect on me. I couldn't allow myself another mistake. I unwrapped the fish\ncarefully, keeping a hand pressed down on it, fully aware that it would try to jump away\nto save itself. The closer the fish was to appearing, the more afraid and disgusted I\nbecame. Its head came into sight. The way I was holding it, it looked like a scoop of\nloathsome fish ice cream sticking out of a wool blanket cone. The thing was gasping for\nwater, its mouth and gills opening and closing slowly. I could feel it pushing with its\nwings against my hand. I turned the bucket over and brought its head against the bottom.\nI took hold of the hatchet. I raised it in the air.\nSeveral times I started bringing the hatchet down, but I couldn't complete the action.\nSuch sentimentalism may seem ridiculous considering what I had witnessed in the last\ndays, but those were the deeds of others, of predatory animals. I suppose I was partly\nresponsible for the rat's death, but I'd only thrown it; it was Richard Parker who had\nkilled it. A lifetime of peaceful vegetarianism stood between me and the willful\nbeheading of a fish.\nI covered the fish's head with the blanket and turned the hatchet around. Again my hand\nwavered in the air. The idea of beating a soft, living head with a hammer was simply too\nmuch.\nI put the hatchet down. I would break its neck, sight unseen, I decided. I wrapped the fish\ntightly in the blanket. With both hands I started bending it. The more I pressed, the more\nthe fish struggled. I imagined what it would feel like if I were wrapped in a blanket and\nsomeone were trying to break my neck. I was appalled. I gave up a number of times. Yet\nI knew it had to be done, and the longer I waited, the longer the fish's suffering would go\non.\nTears flowing down my cheeks, I egged myself on until I heard a cracking sound and I no\nlonger felt any life fighting in my hands. I pulled back the folds of the blanket. The flying\nfish was dead. It was split open and bloody on one side of its head, at the level of the gills.\nI wept heartily over this poor little deceased soul. It was the first sentient being I had ever\nkilled. I was now a killer. I was now as guilty as Cain. I was sixteen years old, a harmless\nboy, bookish and religious, and now I had blood on my hands. It's a terrible burden to\ncarry. All sentient life is sacred. I never forget to include this fish in my prayers.", "After that it was easier. Now that it was dead, the flying fish looked like fish I had seen in\nthe markets of Pondicherry. It was something else, something outside the essential\nscheme of creation. I chopped it up into pieces with the hatchet and put it in the bucket.\nIn the dying hours of the day I tried fishing again. At first I had no better luck than I'd had\nin the morning. But success seemed less elusive. The fish nibbled at the hook with\nfervour. Their interest was evident. I realized that these were small fish, too small for the\nhook. So I cast my line further out and let it sink deeper, beyond the reach of the small\nfish that concentrated around the raft and lifeboat.\nIt was when I used the flying fish's head as bait, and with only one sinker, casting my line\nout and pulling it in quickly, making the head skim over the surface of the water, that I\nfinally had my first strike. A dorado surged forth and lunged for the fish head. I let out a\nlittle slack, to make sure it had properly swallowed the bait, before giving the line a good\nyank. The dorado exploded out of the water, tugging on the line so hard I thought it was\ngoing to pull me off the raft. I braced myself. The line became very taut. It was good line;\nit would not break. I started bringing the dorado in. It struggled with all its might,\njumping and diving and splashing. The line cut into my hands. I wrapped my hands in the\nblanket. My heart was pounding. The fish was as strong as an ox. I was not sure I would\nbe able to pull it in.\nI noticed all the other fish had vanished from around the raft and boat. No doubt they had\nsensed the dorado's distress. I hurried. Its struggling would attract sharks. But it fought\nlike a devil. My arms were aching. Every time I got it close to the raft, it beat about with\nsuch frenzy that I was cowed into letting out some line.\nAt last I managed to haul it aboard. It was over three feet long. The bucket was useless. It\nwould fit the dorado like a hat. I held the fish down by kneeling on it and using my hands.\nIt was a writhing mass of pure muscle, so big its tail stuck out from beneath me,\npounding hard against the raft. It was giving me a ride like I imagine a bucking bronco\nwould give a cowboy. I was in a wild and triumphant mood. A dorado is a magnificentlooking fish, large, fleshy and sleek, with a bulging forehead that speaks of a forceful\npersonality, a very long dorsal fin as proud as a cock's comb, and a coat of scales that is\nsmooth and bright. I felt I was dealing fate a serious blow by engaging such a handsome\nadversary. With this fish I was retaliating against the sea, against the wind, against the\nsinking of ships, against all circumstances that were working against me. \"Thank you,\nLord Vishnu, thank you!\" I shouted. \"Once you saved the world by taking the form of a\nfish. Now you\nhave saved me by taking the form of a fish. Thank you, thank you!\"\nKilling it was no problem. I would have spared myself thd trouble—after all, it was for\nRichard Parker and he would have dispatched it with expert ease—but for the hook that\nwas embedded in its mouth. I exulted at having a dorado at the end of my line—I would\nbe less keen if it were a tiger. I went about the job in a direct way. I took the hatchet in\nboth my hands and vigorously beat the fish on the head with the hammerhead (I still\ndidn't have th stomach to use the sharp edge). The dorado did a most extraordinary thing\nas it died: it began to flash all kinds of colours in rapid succesion. Blue, green, red, gold", "and violet flickered and shimmered neon-like on its surface as it struggled. I felt I was\nbeating a rainbow to death. (I found out later that the dorado is famed for its death-knell\niridescence.) At last it lay still and dull-coloured, and I could remove the hook. I even\nmanaged to retrieve a part of my bait.\nYou may be astonished that in such a short period of time I could go from weeping over\nthe muffled killing of a flying fish to gleefully bludgeoning to death a dorado. I could\nexplain it by arguing that profiting from a pitiful flying fish's navigational mistake made\nme shy and sorrowful, while the excitement of actively capturing a great dorado made me\nsanguinary and self-assured. But in point of fact the explanation lies elsewhere. It is\nsimple and brutal: a person can get used to anything, even to killing.\nIt was with a hunter's pride that I pulled the raft up to the lifeboat. I brought it along the\nside, keeping very low. I swung my arm and dropped the dorado into the boat. It landed\nwith a heavy thud and provoked a gruff expression of surprise from Richard Parker. After\na sniff or two, I heard the wet mashing sound of a mouth at work. I pushed myself off,\nnot forgetting to blow the whistle hard several times, to remind Richard Parker of who\nhad so graciously provided him with fresh food. I stopped to pick up some biscuits and a\ncan of water. The five remaining flying fish in the locker were dead. I pulled their wings\noff, throwing them away, and wrapped the fish in the now-consecrated fish blanket.\nBy the time I had rinsed myself of blood, cleaned up my fishing gear, put things away\nand had my supper, night had come on. A thin layer of clouds masked the stars and the\nmoon, and it was very dark. I was tired, but still excited by the events of the last hours.\nThe feeling of busyness was profoundly satisfying; I hadn't thought at all about my plight\nor myself. Fishing was surely a better way of passing the time than yarn-spinning or\nplaying I Spy. I determined to start again the next day as soon as there was light.\nI fell asleep, my mind lit up by the chameleon-like flickering of the dying dorado."]}, {"num": 62, "paragraphs": ["I slept in fits that night. Shortly before sunrise I gave up trying to fall asleep again and\nlifted myself on an elbow. I spied with my little eye a tiger. Richard Parker was restless.\nHe was moaning and growling and pacing about the lifeboat. It was impressive. I\nassessed the situation. He couldn't be hungry. Or at least not dangerously hungry. Was he\nthirsty? His tongue hung from his mouth, but only on occasion, and he was not panting.\nAnd his stomach and paws were still wet. But they were not dripping wet. There probably\nwasn't much water left in the boat. Soon he would be thirsty.\nI looked up at the sky. The cloud cover had vanished. But for a few wisps on the horizon,\nthe sky was clear. It would be another hot, rainless day. The sea moved in a lethargic way,\nas if already exhausted by the oncoming heat.", "I sat against the mast and thought over our problem. The biscuits and the fishing gear\nassured us of the solid part of our diet. It was the liquid part that was the rub. It all came\ndown to what was so abundant around us but marred by salt. I could perhaps mix some\nsea water with his fresh water, but I had to procure more fresh water to start with. The\ncans would not last long between the two of us—in fact, I was loath to share even one\nwith Richard Parker—and it would be foolish to rely on rainwater.\nThe solar stills were the only other possible source of drinkable water. I looked at them\ndoubtfully. They had been out two days now. I noticed that one of them had lost a little\nair. I pulled on the rope to tend to it. I topped off its cone with air. Without any real\nexpectation I reached underwater for the distillate pouch that was clipped to the round\nbuoyancy chamber. My fingers took hold of a bag that was unexpectedly fat. A shiver of\nthrill went through me. I controlled myself. As likely as not, salt water had leaked in. I\nunhooked the pouch and, following the instructions, lowered it and tilted the still so that\nany more water from beneath the cone might flow into it. I closed the two small taps that\nled to the pouch, detached it and pulled it out of the water. It was rectangular in shape and\nmade of thick, soft, yellow plastic, with calibration marks on one side. I tasted the water.\nI tasted it again. It was salt-free.\n\"My sweet sea cow!\" I exclaimed to the solar still. \"You've produced, and how! What a\ndelicious milk. Mind you, a little rubbery, but I'm not complaining. Why, look at me\ndrink!\"\nI finished the bag. It had a capacity of one litre and was nearly full. After a moment of\nsigh-producing, shut-eyed satisfaction, I reattached the pouch. I checked the other stills.\nEach one had an udder similarly heavy. I collected the fresh milk, over eight litres of it, in\nthe fish bucket. Instantly these technological contraptions became as precious to me as\ncattle are to a farmer. Indeed, as they floated placidly in an arc, they looked almost like\ncows grazing in a field. I ministered to their needs, making sure that there was enough sea\nwater inside each and that the cones and chambers were inflated to just the right pressure.\nAfter adding a little sea water to the bucket's contents, I placed it on the side bench just\nbeyond the tarpaulin. With the end of the morning coolness, Richard Parker seemed\nsafely settled below. I tied the bucket in place using rope and the tarpaulin hooks on the\nside of the boat. I carefully peeked over the gunnel. He was lying on his side. His den\nwas a foul sight. The dead mammals were heaped together, a grotesque pile of decayed\nanimal parts. I recognized a leg or two, various patches of hide, parts of a head, a great\nnumber of bones. Flying-fish wings were scattered about.\nI cut up a flying fish and tossed a piece onto the side bench. After I had gathered what I\nneeded for the day from the locker and was ready to go, I tossed another piece over the\ntarpaulin in front of Richard Parker. It had the intended effect. As I drifted away I saw\nhim come out into the open to fetch the morsel of fish. His head turned and he noticed the\nother morsel and the new object next to it. He lifted himself. He hung his huge head over\nthe bucket. I was afraid he would tip it over. He didn't. His face disappeared into it,", "barely fitting, and he started to lap up the water. In very little time the bucket started\nshaking and rattling emptily with each strike of his tongue. When he looked up, I stared\nhim aggressively in the eyes and I blew on the whistle a few times. He disappeared under\nthe tarpaulin.\nIt occurred to me that with every passing day the lifeboat was resembling a zoo enclosure\nmore and more: Richard Parker had his sheltered area for sleeping and resting, his food\nstash, his lookout and now his water hole.\nThe temperature climbed. The heat became stifling. I spent the rest of the day in the\nshade of the canopy, fishing. It seems I had had beginner's luck with that first dorado. I\ncaught nothing the whole day, not even in the late afternoon, when marine life appeared\nin abundance. A turtle turned up, a different kind this time, a green sea turtle, bulkier and\nsmoother-shelled, but curious in the same fixed way as a hawksbill. I did nothing about it,\nbut I started thinking that I should.\nThe only good thing about the day being so hot was the sight the solar stills presented.\nEvery cone was covered on the inside with drops and rivulets of condensation.\nThe day ended. I calculated that the next morning would make it a week since the\nTsimtsum had sunk."]}, {"num": 63, "paragraphs": ["The Robertson family survived thirty-eight days at sea. Captain Bligh of the celebrated\nmutinous Bounty and his fellow castaways survived forty-seven days. Steven Callahan\nsurvived seventy-six. Owen Chase, whose account of the sinking of the whaling ship\nEssex by a whale inspired Herman Melville, survived eighty-three days at sea with two\nmates, interrupted by a one-week stay on an inhospitable island. The Bailey family\nsurvived 118 days. I have heard of a Korean merchant sailor named Poon, I believe, who\nsurvived the Pacific for 173 days in the 1950s.\nI survived 227 days. That's how long my trial lasted, over seven months.\nI kept myself busy. That was one key to my survival. On a lifeboat, even on a raft, there's\nalways something that needs doing. An average day for me, if such a notion can be\napplied to a castaway, went like this:\nSunrise to mid-morning:\nwake up\nprayers\nbreakfast for Richard Parker\ngeneral inspection of raft and lifeboat, with particular attention paid to all knots and ropes", "tending of solar stills (wiping, inflating, topping off with water)\nbreakfast and inspection of food stores\nfishing and preparing of fish if any caught (gutting, cleaning, hanging of strips of flesh\non lines to cure in the sun)\nMid-morning to late afternoon:\nprayers\nlight lunch\nrest and restful activities (writing in diary, examining of scabs and sores, upkeeping of\nequipment, puttering about locker, observation and study of Richard Parker, picking-at of\nturtle bones, etc.)\nLate afternoon to early evening:\nprayers\nfishing and preparing of fish\ntending of curing strips of flesh (turning over, cutting away of putrid parts)\ndinner preparations\ndinner for self and Richard Parker\nSunset:\ngeneral inspection of raft and lifeboat (knots and ropes again)\ncollecting and safekeeping of distillate from solar stills\nstoring of all foods and equipment arrangements for night (making of bed, safe storage on\nraft of flare, in case of ship, and rain catcher, in case of rain)\nprayers\nNight:\nfitful sleeping\nprayers", "Mornings were usually better than late afternoons, when the emptiness of time tended to\nmake itself felt.\nAny number of events affected this routine. Rainfall, at any time of the day or night,\nstopped all other business; for as long as it fell, I held up the rain catchers and was\nfeverishly occupied storing their catch. A turtle's visit was another major disruption. And\nRichard Parker, of course, was a regular disturbance. Accommodating him was a priority\nI could not neglect for an instant. He didn't have much of a routine beyond eating,\ndrinking and sleeping, but there were times when he stirred from his lethargy and\nrambled about his territory, making noises and being cranky. Thankfully, every time, the\nsun and the sea quickly tired him and he returned to beneath the tarpaulin, to lying on his\nside again, or flat on his stomach, his head on top of his crossed front legs.", "But there was more to my dealings with him than strict necessity. I also spent hours\nobserving him because it was a distraction. A tiger is a fascinating animal at any time,\nand all the more so when it is your sole companion.\nAt first, looking out for a ship was something I did all the time, compulsively. But after a\nfew weeks, five or six, I stopped doing it nearly entirely.\nAnd I survived because I made a point of forgetting. My story started on a calendar\nday—July 2nd, 1977—and ended on a calendar day—February 14th, 1978—but in\nbetween there was no calendar. I did not count the days or the weeks or the months. Time\nis an illusion that only makes us pant. I survived because I forgot even the very notion of\ntime.\nWhat I remember are events and encounters and routines, markers that emerged here and\nthere from the ocean of time and imprinted themselves on my memory. The smell of\nspent hand-flare shells, and prayers at dawn, and the killing of turtles, and the biology of\nalgae, for example. And many more. But I don't know if I can put them in order for you.\nMy memories come in a jumble."]}, {"num": 64, "paragraphs": ["My clothes disintegrated, victims of the sun and the salt. First they became gauze-thin.\nThen they tore until only the seams were left. Lastly, the seams broke. For months I lived\nstark naked except for the whistle that dangled from my neck by a string.\nSalt-water boils—red, angry, disfiguring—were a leprosy of the high seas, transmitted by\nthe water that soaked me. Where they burst, my skin was exceptionally sensitive;\naccidentally rubbing an open sore was so painful I would gasp and cry out. Naturally,\nthese boils developed on the parts of my body that got the most wet and the most wear on\nthe raft; that is, my backside. There were days when I could hardly find a position in\nwhich I could rest. Time and sunshine healed a sore, but the process was slow, and new\nboils appeared if I didn't stay dry."]}, {"num": 65, "paragraphs": ["I spent hours trying to decipher the lines in the survival manual on navigation. Plain and\nsimple explanations on living off the sea were given in abundance, but a basic knowledge\nof seafaring was assumed by the author of the manual. The castaway was to his mind an\nexperienced sailor who, compass, chart and sextant in hand, knew how he found his way\ninto trouble, if not how he would get out of it. The result was advice such as \"Remember,", "time is distance. Don't forget to wind your watch,\" or \"Latitude can be measured with the\nfingers, if need be.\" I had a watch, but it was now at the bottom of the Pacific. I lost it\nwhen the Tsimtsum sank. As for latitude and longitude, my marine knowledge was\nstrictly limited to what lived in the sea and did not extend to what cruised on top of it.\nWinds and currents were a mystery to me. The stars meant nothing to me. I couldn't name\na single constellation. My family lived by one star alone: the sun. We were early to bed\nand early to rise. I had in my life looked at a number of beautiful starry nights, where\nwith just two colours and the simplest of styles nature draws the grandest of pictures, and\nI felt the feelings of wonder and smallness that we all feel, and I got a clear sense of\ndirection from the spectacle, most definitely, but I mean that in a spiritual sense, not in a\ngeographic one. I hadn't the faintest idea how the night sky might serve as a road map.\nHow could the stars, sparkle as they might, help me find my way if they kept moving?\nI gave up trying to find out. Any knowledge I might gain was useless. I had no means of\ncontrolling where I was going—no rudder, no sails, no motor, some oars but insufficient\nbrawn. What was the point of plotting a course if I could not act on it? And even if I\ncould, how should I know where to go? West, back to where we came from? East, to\nAmerica? North, to Asia? South, to where the shipping lanes were? Each seemed a good\nand bad course in equal measure.\nSo I drifted. Winds and currents decided where I went. Time became distance for me in\nthe way it is for all mortals—I travelled down the road of life—and I did other things\nwith my fingers than try to measure latitude. I found out later that I travelled a narrow\nroad, the Pacific equatorial counter-current."]}, {"num": 66, "paragraphs": ["I fished with a variety of hooks at a variety of depths for a variety of fish, from deep-sea\nfishing with large hooks and many sinkers to surface fishing with smaller hooks and only\none or two sinkers. Success was slow to come, and when it did, it was much appreciated,\nbut the effort seemed out of proportion to the reward. The hours were long, the fish were\nsmall, and Richard Parker was forever hungry.\nIt was the gaffs that finally proved to be my most valuable fishing equipment. They came\nin three screw-in pieces: two tubular sections that formed the shaft—one with a moulded\nplastic handle at its end and a ring for securing the gaff with a rope—and a head that\nconsisted of a hook measuring about two inches across its curve and ending in a needlesharp, barbed point. Assembled, each gaff was about five feet long and felt as light and\nsturdy as a sword.\nAt first I fished in open water. I would sink the gaff to a depth of four feet or so,\nsometimes with a fish speared on the hook as bait, and I would wait. I would wait for\nhours, my body tense till it ached. When a fish was in just the right spot, I jerked the gaff", "up with all the might and speed I could muster. It was a split-second decision. Experience\ntaught me that it was better to strike when I felt I had a good chance of success than to\nstrike wildly, for a fish learns from experience too, and rarely falls for the same trap twice.\nWhen I was lucky, a fish was properly snagged on the hook, impaled, and I could\nconfidently bring it aboard. But if I gaffed a large fish in the stomach or tail, it would\noften get away with a twist and a forward spurt of speed. Injured, it would be easy prey\nfor another predator, a gift I had not meant to make. So with large fish I aimed for the\nventral area beneath their gills and their lateral fins, for a fish's instinctive reaction when\nstruck there was to swim up, away from the hook, in the very direction I was pulling.\nThus it would happen-sometimes more pricked than actually gaffed, a fish would burst\nout of the water in my face. I quickly lost my revulsion at touching sea life. None of this\nprissy fish blanket business any more. A fish jumping out of water was confronted by a\nfamished boy with a hands-on no-holds-barred approach to capturing it. If I felt the gaff's\nhold was uncertain, I would let go of it—I had not forgotten to secure it with a rope to the\nraft—and I would clutch at the fish with my hands. Fingers, though blunt, were far more\nnimble than a hook. The struggle would be fast and furious. Those fish were slippery and\ndesperate, and I was just plain desperate. If only I had had as many arms as the goddess\nDurga—two to hold the gaffs, four to grasp the fish and two to wield the hatchets. But I\nhad to make do with two. I stuck fingers into eyes, jammed hands into gills, crushed soft\nstomachs with knees bit tails with my teeth—I did whatever was necessary to hold a fish\ndown until I could reach for the hatchet and chop its head off.\nWith time and experience I became a better hunter. I grew bolder and more agile. I\ndeveloped an instinct, a feel, for what to do.\nMy success improved greatly when I started using part of the cargo net. As a fishing net it\nwas useless—too stiff and heavy and with a weave that wasn't tight enough. But it was\nperfect as a lure. Trailing freely in the water, it proved irresistibly attractive to fish and\neven more so when seaweed started growing on it. Fish that were local in their ambit\nmade the net their neighbourhood, and the quick ones, the ones that tended to streak by,\nthe dorados, slowed down to\nvisit the new development. Neither the residents nor the travellers ever suspected that a\nhook was hidden in the weave. There were some days—too few unfortunately—when I\ncould have all the fish I cared to gaff. At such times I hunted far beyond the needs of my\nhunger or my capacity to cure; there simply wasn't enough space on the lifeboat, or lines\non the raft, to dry so many strips of dorado, flying fish, jacks, groupers and mackerels, let\nalone space in my stomach to eat them. I kept what I could and gave the rest to Richard\nParker. During those days of plenty, I laid hands on so many fish that my body began to\nglitter from all the fish scales that became stuck to it. I wore these spots of shine and\nsilver like tilaks, the marks of colour that we Hindus wear on our foreheads as symbols of\nthe divine. If sailors had come upon me then, I'm sure they would have thought I was a\nfish god standing atop his kingdom and they wouldn't have stopped. Those were the good\ndays. They were rare.", "Turtles were an easy catch indeed, as the survival manual said they were. Under the\n\"hunting and gathering\" heading, they would go under \"gathering\". Solid in build though\nthey were, like tanks, they were neither fast nor powerful swimmers; with just one hand\ngripped around a back flipper, it was possible to hold on to a turtle. But the survival\nmanual failed to mention that a turtle caught was not a turtle had. It still needed to be\nbrought aboard. And hauling a struggling 130-pound turtle aboard a lifeboat was\nanything but easy. It was a labour that demanded feats of strength worthy of Hanuman. I\ndid it by bringing the victim alongside the bow of the boat, carapace against hull, and\ntying a rope to its neck, a front flipper and a back flipper. Then I pulled until I thought\nmy arms would come apart and my head would explode. I ran the ropes around the\ntarpaulin hooks on the opposite side of the bow; every time a rope yielded a little, I\nsecured my gain before the rope slipped back. Inch by inch, a turtle was heaved out of the\nwater. It took time. I remember one green sea turtle that hung from the side of the lifeboat\nfor two days, the whole while thrashing about madly, free flippers beating in the air.\nLuckily, at the last stage, on the lip of the gunnel, it would often happen that a turtle\nwould help me without meaning to. In an attempt to free its painfully twisted flippers, it\nwould pull on them; if I pulled at the same moment, our conflicting efforts sometimes\ncame together and suddenly it would happen, easily: in the most dramatic fashion\nimaginable, a turtle would surge over the gunnel and slide onto the tarpaulin. I would fall\nback, exhausted but jubilant.\nGreen sea turtles gave more meat than hawksbills, and their belly shells were thinner. But\nthey tended to be bigger than hawksbills, often too big to lift out of the water for the\nweakened castaway that I became.\nLord, to think that I'm a strict vegetarian. To think that when I was a child I always\nshuddered when I snapped open a banana because it sounded to me like the breaking of\nan animal's neck. I descended to a level of savagery I never imagined possible."]}, {"num": 67, "paragraphs": ["The underside of the raft became host to a multitude of sea life, like the net but smaller in\nform. It started with a soft green algae that clung to the life jackets. Stiffer algae of a\ndarker kind joined it. They did well and became thick. Animal life appeared. The first\nthat I saw were tiny, translucent shrimp, hardly half an inch long. They were followed by\nfish no bigger that looked like they were permanently under X-ray; their internal organs\nshowed through their transparent skins. After that I noticed the black worms with the\nwhite spines, the green gelatinous slugs with the primitive limbs, the inch-long, motleycoloured fish with the potbellies, and lastly the crabs, half to three-quarters of an inch\nacross and brown in colour. I tried everything but the worms, including the algae. Only\nthe crabs didn't have an unpalatably bitter or salty taste. Every time they appeared, I\npopped them one after another into my mouth like candy until there were none left. I\ncouldn't control myself. It was always a long wait between fresh crops of crabs.", "The hull of the lifeboat invited life too, in the form of small gooseneck barnacles. I\nsucked their fluid. Their flesh made for good fishing bait.\nI became attached to these oceanic hitchhikers, though they weighed the raft down a little.\nThey provided distraction, like Richard Parker. I spent many hours doing nothing but\nlying on my side, a life jacket pushed out of place a few inches, like a curtain from a\nwindow, so that I might have a clear view. What I saw was an upside-down town, small,\nquiet and peaceable, whose citizens went about with the sweet civility of angels. The\nsight was a welcome relief for my frayed nerves."]}, {"num": 68, "paragraphs": ["My sleep pattern changed. Though I rested all the time, I rarely slept longer than an hour\nor so at a stretch, even at night. It was not the ceaseless motion of the sea that disturbed\nme, nor the wind; you get used to those the way you get used to lumps in a mattress. It\nwas apprehension and anxiety that roused me. It was remarkable how little sleep I got by\non.\nUnlike Richard Parker. He became a champion napper. Most of the time he rested\nbeneath the tarpaulin. But on calm days when the sun was not too harsh and on calm\nnights, he came out. One of his favourite positions in the open was lying on the stern\nbench on his side, stomach overhanging the edge of it, front and back legs extending\ndown the side benches. It was a lot of tiger to squeeze onto a fairly narrow ledge, but he\nmanaged it by making his back very round. When he was truly sleeping, he laid his head\non his front legs, but when his mood was slightly more active, when he might choose to\nopen his eyes and look about, he turned his head and lay his chin on the gunnel.\nAnother favourite position of his was sitting with his back to me, his rear half resting on\nthe floor of the boat and his front half on the bench, his face buried into the stern, paws\nright next to his head, looking as if we were playing hide-and-seek and he were the one\ncounting. In this position he tended to lie very still, with only the occasional twitching of\nhis ears to indicate that he was not necessarily sleeping."]}, {"num": 69, "paragraphs": ["On many nights I was convinced I saw a light in the distance. Each time I set off a flare.\nWhen I had used up the rocket flares, I expended the hand flares. Were they ships that\nfailed to see me? The light of rising or setting stars bouncing off the ocean? Breaking\nwaves that moonlight and forlorn hope fashioned into illusion? Whatever the case, every", "time it was for nothing. Never a result. Always the bitter emotion of hope raised and\ndashed. In time I gave up entirely on being saved by a ship. If the horizon was two and a\nhalf miles away at an altitude of five feet, how far away was it when I was sitting against\nthe mast of my raft, my eyes not even three feet above the water? What chance was there\nthat a ship crossing the whole great big Pacific would cut into such a tiny circle? Not only\nthat: that it would cut into such a tiny circle and see me—what chance was there of that?\nNo, humanity and its unreliable ways could not be counted upon. It was land I had to\nreach, hard, firm, certain land.\nI remember the smell of the spent hand-flare shells. By some freak of chemistry they\nsmelled exactly like cumin. It was intoxicating. I sniffed the plastic shells and\nimmediately Pondicherry came to life in my mind, a marvellous relief from the\ndisappointment of calling for help and not being heard. The experience was very strong,\nnearly a hallucination. From a single smell a whole town arose. (Now, when I smell\ncumin, I see the Pacific Ocean.)\nRichard Parker always froze when a hand flare hissed to life. His eyes, round pupils the\nsize of pinpricks, fixed on the light steadily. It was too bright for me, a blinding white\ncentre with a pinkish red aureole. I had to turn away. I held the flare in the air at arm's\nlength and waved it slowly. For about a minute heat showered down upon my forearm\nand everything was weirdly lit. Water around the raft, until a moment before opaquely\nblack, showed itself to be crowded with fish."]}, {"num": 70, "paragraphs": ["Butchering a turtle was hard work. My first one was a small hawksbill. It was its blood\nthat tempted me, the \"good, nutritious, salt-free drink\" promised by the survival manual.\nMy thirst was that bad. I took hold of the turtle's shell and grappled with one of its back\nflippers. When I had a good grip, I turned it over in the water and attempted to pull it\nonto the raft. The thing was thrashing violently. I would never be able to deal with it on\nthe raft. Either I let it go—or I tried my luck on the lifeboat. I looked up. It was a hot and\ncloudless day. Richard Parker seemed to tolerate my presence at the bow on such days,\nwhen the air was like the inside of an oven and he did not move from under the tarpaulin\nuntil sunset.\nI held on to one of the turtle's back flippers with one hand and I pulled on the rope to the\nlifeboat with the other. It was not easy climbing aboard. When I had managed it, I jerked\nthe turtle in the air and brought it onto its back on the tarpaulin. As I had hoped, Richard\nParker did no more than growl once or twice. He was not up to exerting himself in such\nheat.\nMy determination was grim and blind. I felt I had no time to waste. I turned to the\nsurvival manual as to a cookbook. It said to lay the turtle on its back. Done. It advised", "that a knife should be \"inserted into the neck\" to sever the arteries and veins running\nthrough it. I looked at the turtle. There was no neck. The turtle had retracted into its shell;\nall that showed of its head was its eyes and its beak, surrounded by circles of skin. It was\nlooking at me upside down with a stern expression. I took hold of the knife and, hoping\nto goad it, poked a front flipper. It only shrank further into its shell. I decided on a more\ndirect approach. As confidently as if I had done it a thousand times, I jammed the knife\njust to the right of the turtle's head, at an angle. I pushed the blade deep into the folds of\nskin and twisted it. The turtle retreated even further, favouring the side where the blade\nwas, and suddenly shot its head forward, beak snapping at me viciously. I jumped back.\nAll four flippers came out and the creature tried to make its getaway. It rocked on its back,\nflippers beating wildly and head shaking from side to side. I took hold of a hatchet and\nbrought it down on the turtle's neck, gashing it. Bright red blood shot out. I grabbed the\nbeaker and collected about three hundred millilitres, a pop can's worth. I might have got\nmuch more, a litre I would guess, but the turtle's beak was sharp and its front flippers\nwere long and powerful, with two claws on each. The blood I managed to collect gave off\nno particular smell. I took a sip. It tasted warm and animal, if my memory is right. It's\nhard to remember first impressions. I drank the blood to the last drop.\nI thought I would use the hatchet to remove the tough belly shell, but it proved easier\nwith the sawtoothed edge of the knife. I set one foot at the centre of the shell, the other\nclear of the flailing flippers. The leathery skin at the head end of the shell was easy\ncutting, except around the flippers. Sawing away at the rim, however, where shell met\nshell, was very hard work, especially as the turtle wouldn't stop moving. By the time I\nhad gone all the way around I was bathed in sweat and exhausted. I pulled on the belly\nshell. It lifted reluctantly, with a wet sucking sound. Inner life was revealed, twitching\nand jerking— muscles, fat, blood, guts and bones. And still the turtle thrashed about. I\nslashed its neck to the vertebrae. It made no difference. Flippers continued to beat. With\ntwo blows of the hatchet I cut its head right off. The flippers did not stop. Worse, the\nseparated head went on gulping for air and blinking its eyes. I pushed it into the sea. The\nliving rest of the turtle I lifted and dropped into Richard Parkers territory. He was making\nnoises and sounded as if he were about to stir. He had probably smelled the turtle's blood.\nI fled to the raft.\nI watched sullenly as he loudly appreciated my gift and made a joyous mess of himself. I\nwas utterly spent. The effort of butchering the turtle had hardly seemed worth the cup of\nblood.\nI started thinking seriously about how I was going to deal with Richard Parker. This\nforbearance on his part on hot, cloudless days, if that is what it was and not simple\nlaziness, was not good enough. I couldn't always be running away from him. I needed\nsafe access to the locker and the top of the tarpaulin, no matter the time of day or the\nweather, no matter his mood. It was rights I needed, the sort of rights that come with\nmight.\nIt was time to impose myself and carve out my territory."]}, {"num": 72, "paragraphs": ["In my case, to protect myself from Richard Parker while I trained him, I made a shield\nwith a turtle shell. I cut a notch on each side of the shell and connected them with a\nlength of rope. The shield was heavier than I would have liked, but do soldiers ever get to\nchoose their ordnance?", "The first time I tried, Richard Parker bared his teeth, rotated his ears full round, vomited a\nshort guttural roar and charged. A great, full-clawed paw rose in the air and cuffed my\nshield. The blow sent me flying off the boat. I hit the water and instantly let go of the\nshield. It sank without a trace after hitting me in the shin. I was beside myself with\nterror—of Richard Parker, but also of being in the water. In my mind a shark was at that\nvery second shooting up for me. I swam for the raft in frantic strokes, precisely the sort of\nwild thrashing that sharks find so deliciously inviting. Luckily there were no sharks. I\nreached the raft, let out all the rope and sat with my arms wrapped around my knees and\nmy head down, trying to put out the fire of fear that was blazing within me. It was a long\ntime before the trembling of my body stopped completely. I stayed on the raft for the rest\nof that day and the whole night. I did not eat or drink.\nI was at it again next time I caught a turtle. Its shell was smaller, lighter, and made for a\nbetter shield. Once more I advanced and started stamping on the middle bench with my\nfoot.\nI wonder if those who hear this story will understand that my behaviour was not an act of\ninsanity or a covert suicide attempt but a simple necessity. Either I tamed him, made him\nsee who was Number One and who was Number Two-or I died the day I wanted to climb\naboard the lifeboat during rough weather and he objected.\nIf I survived my apprenticeship as a high seas animal trainer it was because Richard\nParker did not really want to attack me. Tigers, indeed all animals, do not favour violence\nas a means of settling scores. When animals fight, it is with the intent to kill and with the\nunderstanding that they may be killed. A clash is costly. And so animals have a full\nsystem of cautionary signals designed to avoid a showdown, and they are quick to back\ndown when they feel they can. Rarely will a tiger attack a fellow predator without\nwarning. Typically a head-on rush for the adversary will be made, with much snarling\nand growling. But just before it is too late, the tiger will freeze, the menace rumbling\ndeep in its throat. It will appraise the situation. If it decides that there is no threat, it will\nturn away, feeling that its point has been made.\nRichard Parker made his point with me four times. Four times he struck at me with his\nright paw and sent me overboard, and four times I lost my shield. I was terrified before,\nduring and after each attack, and I spent a long time shivering with fear on the raft.\nEventually I learned to read the signals he was sending me. I found that with his ears, his\neyes, his whiskers, his teeth, his tail and his throat, he spoke a simple, forcefully\npunctuated language that told me what his next move might be. I learned to back down\nbefore he lifted his paw in the air.\nThen I made my point, feet on the gunnel, boat rolling, my single-note language blasting\nfrom the whistle, and Richard Parker moaning and gasping at the bottom of the boat.\nMy fifth shield lasted me the rest of his training."]}, {"num": 73, "paragraphs": ["My greatest wish—other than salvation—was to have a book. A long book with a neverending story. One I could read again and again, with new eyes and a fresh understanding\neach time. Alas, there was no scripture in the lifeboat. I was a disconsolate Arjuna in a\nbattered chariot without the benefit of Krishna's words. The first time I came upon a\nBible in the bedside table of a hotel room in Canada, I burst into tears. I sent a\ncontribution to the Gideons the very next day, with a note urging them to spread the\nrange of their activity to all places where worn and weary travellers might lay down their\nheads, not just to hotel rooms, and that they should leave not only Bibles, but other sacred\nwritings as well. I cannot think of a better way to spread the faith. No thundering from a\npulpit, no condemnation from bad churches, no peer pressure, just a book of scripture\nquietly waiting to say hello, as gentle and powerful as a little girl's kiss on your cheek.\nAt the very least, if I had had a good novel! But there was only the survival manual,\nwhich I must have read ten thousand times over the course of my ordeal.\nI kept a diary. It's hard to read. I wrote as small as I could. I was afraid I would run out of\npaper. There's not much to it. Words scratched on a page trying to capture a reality that\noverwhelmed me. I started it a week or so after the sinking of the Tsimtsum. Before that I\nwas too busy and scattered. The entries are not dated or numbered. What strikes me now\nis how time is captured. Several days, several weeks, all on one page. I talked about what\nyou might expect: about things that happened and how I felt, about what I caught and\nwhat I didn't, about seas and weather, about problems and solutions, about Richard\nParker. All very practical stuff."]}, {"num": 74, "paragraphs": ["I practised religious rituals that I adapted to the circumstances—solitary Masses without\npriests or consecrated Communion hosts, darshans without murtis, and pujas with turtle\nmeat for prasad, acts of devotion to Allah not knowing where Mecca was and getting my\nArabic wrong. They brought me comfort, that is certain. But it was hard, oh, it was hard.\nFaith in God is an opening up, a letting go, a deep trust, a free act of love—but\nsometimes it was so hard to love. Sometimes my heart was sinking so fast with anger,\ndesolation and weariness, I was afraid it would sink to the very bottom of the Pacific and\nI would not be able to lift it back up.\nAt such moments I tried to elevate myself. I would touch the turban I had made with the\nremnants of my shirt and I would say aloud, \"THIS IS GOD'S HAT!\"", "I would pat my pants and say aloud, \"THIS IS GOD'S ATTIRE!\" I would point to\nRichard Parker and say aloud, \"THIS IS GOD'S CAT!\"\nI would point to the lifeboat and say aloud, \"THIS IS GOD'S ARK!\"\nI would spread my hands wide and say aloud, \"THESE ARE GOD'S WIDE ACRES!\"\nI would point at the sky and say aloud, \"THIS IS GOD'S EAR!\"\nAnd in this way I would remind myself of creation and of my place in it.\nBut God's hat was always unravelling. God's pants were falling apart. God's cat was a\nconstant danger. God's ark was a jail. God's wide acres were slowly killing me. God's ear\ndidn't seem to be listening.\nDespair was a heavy blackness that let no light in or out. It was a hell beyond expression.\nI thank God it always passed. A school of fish appeared around the net or a knot cried out\nto be reknotted. Or I thought of my family, of how they were spared this terrible agony.\nThe blackness would stir and eventually go away, and God would remain, a shining point\nof light in my heart. I would go on loving."]}, {"num": 75, "paragraphs": ["On the day when I estimated it was Mother's birthday, I sang \"Happy Birthday\" to her out\nloud."]}, {"num": 76, "paragraphs": ["I got into the habit of cleaning up after Richard Parker. As soon as I became aware that\nhe had had a bowel movement, I went about getting to it, a risky operation involving\nnudging his feces my way with the gaff and reaching for them from the tarpaulin. Feces\ncan be infected with parasites. This does not matter with animals in the wild since they\nrarely spend any time next to their feces and mostly have a neutral relationship to them;\ntree dwellers hardly see them at all and land animals normally excrete and move on. In\nthe compact territory of a zoo, however, the case is quite different, and to leave feces in\nan animal's enclosure is to invite reinfection by encouraging the animal to eat them,\nanimals being gluttons for anything that remotely resembles food. That is why enclosures\nare cleaned, out of concern for the intestinal health of animals, not to spare the eyes and\nnoses of visitors. But upholding the Patel family's reputation for high standards in\nzookeeping was not my concern in the case at hand. In a matter of weeks Richard Parker", "became constipated and his bowel movements came no more than once a month, so my\ndangerous janitoring was hardly worth it from a sanitary point of view. It was for another\nreason that I did it: it was because the first time Richard Parker relieved himself in the\nlifeboat, I noticed that he tried to hide the result. The significance of this was not lost on\nme. To display his feces openly, to flaunt the smell of them, would have been a sign of\nsocial dominance. Conversely, to hide them, or try to, was a sign of deference—of\ndeference to me.\nI could tell that it made him nervous. He stayed low, his head cocked back and his ears\nflat to the sides, a quiet, sustained growl coming from him. I proceeded with exceptional\nalertness and deliberation, not only to preserve my life but also to give him the right\nsignal. The right signal was that when I had his feces in my hand, I rolled them about for\nsome seconds, brought them close to my nose and sniffed them loudly, and swung my\ngaze his way a few times in a showy manner, glaring at him wide-eyed (with fear, if only\nhe knew) long enough to give him the willies, but not so long as to provoke him. And\nwith each swing of my gaze, I blew in a low, menacing way in the whistle. By doing this,\nby badgering him with my eyes (for, of course, with all animals, including us, to stare is\nan aggressive act) and by sounding that whistle cry that had such ominous associations in\nhis mind, I made clear to Richard Parker that it was my right, my lordly right, to fondle\nand sniff his feces if I wanted to. So you see, it was not good zookeeping I was up to, but\npsychological bullying. And it worked. Richard Parker never stared back; his gaze always\nfloated in midair, neither on me nor off me. It was something I could feel as much as I\nfelt his balls of excrement in my hand: mastery in the making. The exercise always left\nme utterly drained from the tension, yet exhilarated.\nSince we are on the subject, I became as constipated as Richard Parker. It was the result\nof our diet, too little water and too much protein. For me, relieving myself, also a\nmonthly act, was hardly that. It was a long-drawn, arduous and painful event that left me\nbathing in sweat and helpless with exhaustion, a trial worse than a high fever."]}, {"num": 77, "paragraphs": ["As the cartons of survival rations diminished, I reduced my intake till I was following\ninstructions exactly, holding myself to only two biscuits every eight hours. I was\ncontinuously hungry. I thought about food obsessively. The less I had to eat, the larger\nbecame the portions I dreamed of. My fantasy meals grew to be the size of India. A\nGanges of dhal soup. Hot chapattis the size of Rajasthan. Bowls of rice as big as Uttar\nPradesh. Sambars to flood all of Tamil Nadu. Ice cream heaped as high as the Himalayas.\nMy dreaming became quite expert: all ingredients for my dishes were always in fresh and\nplentiful supply; the oven or frying pan was always at just the right temperature; the\nproportion of things was always bang on; nothing was ever burnt or undercooked,\nnothing too hot or too cold. Every meal was simply perfect—only just beyond the reach\nof my hands.", "By degrees the range of my appetite increased. Whereas at first I gutted fish and peeled\ntheir skin fastidiously, soon I no more than rinsed off their slimy slipperiness before\nbiting into them, delighted to have such a treat between my teeth. I recall flying fish as\nbeing quite tasty, their flesh rosy white and tender. Dorado had a firmer texture and a\nstronger taste. I began to pick at fish heads rather than toss them to Richard Parker or use\nthem as bait. It was a great discovery when I found that a fresh-tasting fluid could be\nsucked out not only from the eyes of larger fish but also from their vertebrae. Turtles—\nwhich previously I had roughly opened up with the knife and tossed onto the floor of the\nboat for Richard Parker, like a bowl of hot soup—became my favourite dish.\nIt seems impossible to imagine that there was a time when I looked upon a live sea turtle\nas a ten-course meal of great delicacy, a blessed respite from fish. Yet so it was. In the\nveins of turtles coursed a sweet lassi that had to be drunk as soon as it spurted from their\nnecks, because it coagulated in less than a minute. The best poriyals and kootus in the\nland could not rival turtle flesh, either cured brown or fresh deep red. No cardamom\npayasam I ever tasted was as sweet or as rich as creamy turtle eggs or cured turtle fat. A\nchopped-up mixture of heart, lungs, liver, flesh and cleaned-out intestines sprinkled with\nfish parts, the whole soaked in a yolk-and-serum gravy, made an unsurpassable, fingerlicking thali. By the end of my journey I was eating everything a turtle had to offer. In the\nalgae that covered the shells of some hawksbills I sometimes found small crabs and\nbarnacles. Whatever I found in a turtle's stomach became my turn to eat. I whiled away\nmany a pleasant hour gnawing at a flipper joint or splitting open bones and licking out\ntheir marrow. And my fingers were forever picking away at bits of dry fat and dry flesh\nthat clung to the inner sides of shells, rummaging for food in the automatic way of\nmonkeys.\nTurtle shells were very handy. I couldn't have done without them. They served not only\nas shields, but as cutting boards for fish and as bowls for mixing food. And when the\nelements had destroyed the blankets beyond repair, I used the shells to\nprotect myself from the sun by propping them against each other and lying beneath them.\nIt was frightening, the extent to which a full belly made for a good mood. The one would\nfollow the other measure for measure: so much food and water, so much good mood. It\nwas such a terribly fickle existence. I was at the mercy of turtle meat for smiles.\nBy the time the last of the biscuits had disappeared, anything was good to eat, no matter\nthe taste. I could put anything in my mouth, chew it and swallow it—delicious, foul or\nplain—so long as it wasn't salty. My body developed a revulsion for salt that I still\nexperience to this day.\nI tried once to eat Richard Parker's feces. It happened early on, when my system hadn't\nlearned yet to live with hunger and my imagination was still wildly searching for\nsolutions. I had delivered fresh solar-still water to his bucket not long before. After\ndraining it in one go, he had disappeared below the tarpaulin and I had returned to\nattending to some small matter in the locker. As I always did in those early days, I", "glanced below the tarpaulin every so often to make sure he wasn't up to something. Well,\nthis one time, lo, he was. He was crouched, his back was rounded and his rear legs were\nspread. His tail was raised, pushing up against the tarpaulin. The position was tell-tale.\nRight away I had food in mind, not animal hygiene. I decided there was little danger. He\nwas turned the other way and his head was out of sight. If I respected his peace and quiet,\nhe might not even notice me. I grabbed a bailing cup and stretched my arm forward. My\ncup arrived in the nick of time. At the second it was in position at the base of his tail,\nRichard Parker's anus distended, and out of it, like a bubble-gum balloon, came a black\nsphere of excrement. It fell into my cup with a clink, and no doubt I will be considered to\nhave abandoned the last vestiges of humanness by those who do not understand the\ndegree of my suffering when I say that it sounded to my ears like the music of a fiverupee coin dropped into a beggar's cup. A smile cracked my lips and made them bleed. I\nfelt deep gratitude towards Richard Parker. I pulled back the cup. I took the turd in my\nfingers. It was very warm, but the smell was not strong. In size it was like a big ball of\ngulab jamun, but with none of the softness. In fact, it was as hard as a rock. Load a\nmusket with it and you could have shot a rhino.\nI returned the ball to the cup and added a little water. I covered it and set it aside. My\nmouth watered as I waited. When I couldn't stand the wait any longer, I popped the ball\ninto my mouth. I couldn't eat it. The taste was acrid, but it wasn't that. It was rather my\nmouth's conclusion, immediate and obvious: there's nothing to be had here. It was truly\nwaste matter, with no nutrients in it. I spat it out and was bitter at the loss of precious\nwater. I took the gaff and went about collecting the rest of Richard Parker's feces. They\nwent straight to the fish.\nAfter just a few weeks my body began to deteriorate. My feet and ankles started to swell\nand I was finding it very tiring to stand."]}, {"num": 78, "paragraphs": ["There were many skies. The sky was invaded by great white clouds, flat on the bottom\nbut round and billowy on top. The sky was completely cloudless, of a blue quite\nshattering to the senses. The sky was a heavy, suffocating blanket of grey cloud, but\nwithout promise of rain. The sky was thinly overcast. The sky was dappled with small,\nwhite, fleecy clouds. The sky was streaked with high, thin clouds that looked like a cotton\nball stretched apart. The sky was a featureless milky haze. The sky was a density of dark\nand blustery rain clouds that passed by without delivering rain. The sky was painted with\na small number of flat clouds that looked like sandbars. The sky was a mere block to\nallow a visual effect on the horizon: sunlight flooding the ocean, the vertical edges\nbetween light and shadow perfectly distinct. The sky was a distant black curtain of falling\nrain. The sky was many clouds at many levels, some thick and opaque, others looking\nlike smoke. The sky was black and spitting rain on my smiling face. The sky was nothing\nbut falling water, a ceaseless deluge that wrinkled and bloated my skin and froze me stiff.", "There were many seas. The sea roared like a tiger. The sea whispered in your ear like a\nfriend telling you secrets. The sea clinked like small change in a pocket. The sea\nthundered like avalanches. The sea hissed like sandpaper working on wood. The sea\nsounded like someone vomiting. The sea was dead silent.\nAnd in between the two, in between the sky and the sea, were all the winds.\nAnd there were all the nights and all the moons.\nTo be a castaway is to be a point perpetually at the centre of a circle. However much\nthings may appear to change—the sea may shift from whisper to rage, the sky might go\nfrom fresh blue to blinding white to darkest black—the geometry never changes. Your\ngaze is always a radius. The circumference is ever great. In fact, the circles multiply. To\nbe a castaway is to be caught in a harrowing ballet of circles. You are at the centre of one\ncircle, while above you two opposing circles spin about. The sun distresses you like a\ncrowd, a noisy, invasive crowd that makes you cup your ears, that makes you close your\neyes, that makes you want to hide. The moon distresses you by silently reminding you of\nyour solitude; you open your eyes wide to escape your loneliness. When you look up, you\nsometimes wonder if at the centre of a solar storm, if in the middle of the Sea of\nTranquillity, there isn't another one like you also looking up, also trapped by geometry,\nalso struggling with fear, rage, madness, hopelessness, apathy.\nOtherwise, to be a castaway is to be caught up in grim and exhausting opposites. When it\nis light, the openness of the sea is blinding and frightening. When it is dark, the darkness\nis claustrophobic. When it is day, you are hot and wish to be cool and dream of ice cream\nand pour sea water on yourself. When it is night you are cold and wish to be warm and\ndream of hot curries; and wrap yourself in blankets. When it is hot, you are parched and\nwish to be wet. When it rains, you are nearly drowned and wish to be dry. When there is\nfood, there is too much of it and you must feast. When there is none, there is truly none\nand you starve. When the sea is flat and motionless, you wish it would stir. When it rises\nup and the circle that imprisons you is broken by hills of water, you suffer that peculiarity\nof the high seas, suffocation in open spaces, and you wish the sea would be flat again.\nThe opposites often take place at the same moment, so that when the sun is scorching you\ntill you are stricken down, you are also aware that it is drying the strips of fish and meat\nthat are hanging from your lines and that it is a blessing for your solar stills. Conversely,\nwhen a rain squall is replenishing your fresh water supplies, you also know that the\nhumidity will affect your cured provisions and that some will probably go bad, turning\npasty and green. When rough weather abates, and it becomes clear that you have survived\nthe sky's attack and the sea's treachery, your jubilation is tempered by the rage that so\nmuch fresh water should fall directly into the sea and by the worry that it is the last rain\nyou will ever see, that you will die of thirst before the next drops fall.\nThe worst pair of opposites is boredom and terror. Sometimes your life is a pendulum\nswing from one to the other. The sea is without a wrinkle. There is not a whisper of wind.\nThe hours last forever. You are so bored you sink into a state of apathy close to a coma.", "Then the sea becomes rough and your emotions are whipped into a frenzy. Yet even these\ntwo opposites do not remain distinct. In your boredom there are elements of terror: you\nbreak down into tears; you are filled with dread; you scream; you deliberately hurt\nyourself And in the grip of terror—the worst storm—you yet feel boredom, a deep\nweariness with it all.\nOnly death consistently excites your emotions, whether contemplating it when life is safe\nand stale, or fleeing it when life is threatened and precious.\nLife on a lifeboat isn't much of a life. It is like an end game in chess, a game with few\npieces. The elements couldn't be more simple, nor the stakes higher. Physically it is\nextraordinarily arduous, and morally it is killing. You must make adjustments if you want\nto survive. Much becomes expendable. You get your happiness where you can. You\nreach a point where you're at the bottom of hell, yet you have your arms crossed and a\nsmile on your face, and you feel you're the luckiest person on earth. Why? Because at\nyour feet you have a tiny dead fish."]}, {"num": 79, "paragraphs": ["There were sharks every day, mainly makos and blue sharks, but also oceanic whitetips,\nand once a tiger shark straight from the blackest of nightmares. Dawn and dusk were their\nfavourite times. They never seriously troubled us. On occasion one knocked the hull of\nthe lifeboat with its tail. I don't think it was accidental (other marine life did it too, turtles\nand even dorados). I believe it was part of a shark's way of determining the nature of the\nlifeboat. A good whack on the offender's nose with a hatchet sent it vanishing post-haste\ninto the deep. The main nuisance of sharks was that they made being in the water risky,\nlike trespassing on a property where there's a sign saying Beware of Dog. Otherwise, I\ngrew quite fond of sharks. They were like curmudgeonly old friends who would never\nadmit that they liked me yet came round to see me all the time. The blue sharks were\nsmaller, usually no more than four or five feet long, and the most attractive, sleek and\nslender, with small mouths and discreet gill slits. Their backs were a rich ultramarine and\ntheir stomachs snow white, colours that vanished to grey or black when they were at any\ndepth, but which close to the surface sparkled with surprising brilliance. The makos were\nlarger and had mouths bursting with frightening teeth, but they too were nicely coloured,\nan indigo blue that shimmered beautifully in the sun. The oceanic whitetips were often\nshorter than the makos—some of which stretched to twelve feet—but they were much\nstockier and had enormous dorsal fins that they sailed high above the surface of the water,\nlike a war banner, a rapidly moving sight that was always nerve-racking to behold.\nBesides, they were a dull colour, a sort of greyish brown, and the mottled white tips of\ntheir fins held no special attraction.", "I caught a number of small sharks, blue sharks for the most part, but some makos too.\nEach time it was just after sunset, in the dying light of the day, and I caught them with\nmy bare hands as they came close to the lifeboat.\nThe first one was my largest, a mako over four feet long. It had come and gone near the\nbow several times. As it was passing by yet again, I impulsively dropped my hand into\nthe water and grabbed it just ahead of the tail, where its body was thinnest. Its harsh skin\nafforded such a marvellously good grip that without thinking about what I was doing, I\npulled. As I pulled, it jumped, giving my arm a terrific shake. To my horror and delight\nthe thing vaulted in the air in an explosion of water and spray. For the merest fraction of a\nsecond I didn't know what to do next. The thing was smaller than I—but wasn't I being a\nfoolhardy Goliath here? Shouldn't I let go? I turned and swung, and falling on the\ntarpaulin, I threw the mako towards the stern. The fish fell from the sky into Richard\nParker's territory. It landed with a crash and started thwacking about with such thunder\nthat I was afraid it would demolish the boat. Richard Parker was startled. He attacked\nimmediately.\nAn epic battle began. Of interest to zoologists I can report the following: a tiger will not\nat first attack a shark out of water with its jaws but will rather strike at it with its\nforepaws. Richard Parker started clubbing the shark. I shuddered at every blow. They\nwere simply terrible. Just one delivered to a human would break every bone, would turn\nany piece of furniture into splinters, would reduce an entire house into a pile of rubble.\nThat the mako was not enjoying the treatment was evident from the way it was twisting\nand turning and beating its tail and reaching with its mouth.\nPerhaps it was because Richard Parker was not familiar with sharks, had never\nencountered a predatory fish—whatever the case, it happened: an accident, one of those\nfew times when I was reminded that Richard Parker was not perfect, that despite his\nhoned instincts he too could bumble. He put his left paw into the mako's mouth. The\nmako closed its jaws. Immediately Richard Parker reared onto his back legs. The shark\nwas jerked up, but it wouldn't let go. Richard Parker fell back down, opened his mouth\nwide and full-out roared. I felt a blast of hot air against my body. The air visibly shook,\nlike the heat coming off a road on a hot day. I can well imagine that somewhere far off,\n150 miles away, a ship's watch looked up, startled, and later reported the oddest thing,\nthat he thought he heard a cat's meow coming from three o'clock. Days later that roar was\nstill ringing in my guts. But a shark is deaf, conventionally speaking. So while I, who\nwouldn't think of pinching a tiger's paw, let alone of trying to swallow one, received a\nvolcanic roar full in the face and quaked and trembled and turned liquid with fear and\ncollapsed, the shark perceived only a dull vibration.\nRichard Parker turned and started clawing the shark's head with his free front paw and\nbiting it with his jaws, while his rear legs began tearing at its stomach and back. The\nshark held on to his paw, its only line of defence and attack, and thrashed its tail. Tiger\nand shark twisted and tumbled about. With great effort I managed to gain enough control\nof my body to get onto the raft and release it. The lifeboat drifted away. I saw flashes of", "orange and deep blue, of fur and skin, as the lifeboat rocked from side to side. Richard\nParker's snarling was simply terrifying.\nAt last the boat stopped moving. After several minutes Richard Parker sat up, licking his\nleft paw.\nIn the following days he spent much time tending his four paws. A shark's skin is covered\nwith minute tubercles that make it as rough as sandpaper. He had no doubt cut himself\nwhile repeatedly raking the shark. His left paw was injured, but the damage did not seem\npermanent; no toes or claws were missing. As for the mako, except for the tips of the tail\nand the mouth area, incongruously untouched, it was a half-eaten, butchered mess.\nChunks of reddish grey flesh and clumps of internal organs were strewn about.\nI managed to gaff some of the shark's remains, but to my disappointment the vertebrae of\nsharks do not hold fluid. At least the flesh was tasty and unfishy, and the crunchiness of\ncartilage was a welcome respite from so much soft food.\nSubsequently I went for smaller sharks, pups really, and I killed them myself. I found that\nstabbing them through the eyes with the knife was a faster, less tiresome way of killing\nthem than hacking at the tops of their heads with the hatchet."]}, {"num": 80, "paragraphs": ["Of all the dorados, I remember one in particular, a special dorado. It was early morning\non a cloudy day, and we were in the midst of a storm of flying fish. Richard Parker was\nactively swatting at them. I was huddled behind a turtle shell, shielding myself from the\nflying fish. I had a gaff with a piece of net hanging from it extended into the open. I was\nhoping to catch fish in this way. I wasn't having much luck. A flying fish whizzed by.\nThe dorado that was chasing it burst out of the water. It was a bad calculation. The\nanxious flying fish got away, just missing my net, but the dorado hit the gunnel like a\ncannonball. The thud it made shook the whole boat. A spurt of blood sprayed the\ntarpaulin. I reacted quickly. I dropped beneath the hail of flying fish and reached for the\ndorado just ahead of a shark. I pulled it aboard. It was dead, or nearly there, and turning\nall kinds of colours. What a catch! What a catch! I thought excitedly. Thanks be to you,\nJesus-Matsya. The fish was fat and fleshy. It must have weighed a good forty pounds. It\nwould feed a horde. Its eyes and spine would irrigate a desert.\nAlas, Richard Parker's great head had turned my way. I sensed it from the corner of my\neyes. The flying fish were still coming, but he was no longer interested in them; it was\nthe fish in my hands that was now the focus of his attention. He was eight feet away. His\nmouth was half open, a fish wing dangling from it. His back became rounder. His rump\nwriggled. His tail twitched. It was clear: he was in a crouch and he was making to attack\nme. It was too late to get away, too late even to blow my whistle. My time had come.", "But enough was enough. I had suffered so much. I was so hungry. There are only so\nmany days you can go without eating.\nAnd so, in a moment of insanity brought on by hunger—because I was more set on eating\nthan I was on staying alive—without any means of defence, naked in every sense of the\nterm, I looked Richard Parker dead in the eyes. Suddenly his brute strength meant only\nmoral weakness. It was nothing compared to the strength in my mind. I stared into his\neyes, wide-eyed and defiant, and we faced off. Any zookeeper will tell you that a tiger,\nindeed any cat, will not attack in the face of a direct stare but will wait until the deer or\nantelope or wild ox has turned its eyes. But to know that and to apply it are two very\ndifferent things (and it's a useless bit of knowledge if you're hoping to stare down a\ngregarious cat. While you hold one lion in the thrall of your gaze, another will come up to\nyou from behind). For two, perhaps three seconds, a terrific battle of minds for status and\nauthority was waged between a boy and a tiger. He needed to make only the shortest of\nlunges to be on top of me. But I held my stare.\nRichard Parker licked his nose, groaned and turned away. He angrily batted a flying fish.\nI had won. I gasped with disbelief, heaved the dorado into my hands and hurried away to\nthe raft. Shortly thereafter, I delivered to Richard Parker a fair chunk of the fish.\nFrom that day onwards I felt my mastery was no longer in question, and I began to spend\nprogressively more time on the lifeboat, first at the bow, then, as I gained confidence, on\nthe more comfortable tarpaulin. I was still scared of Richard Parker, but only when it was\nnecessary. His simple presence no longer strained me. You can get used to anything—\nhaven't I already said that? Isn't that what all survivors say?\nInitially I lay on the tarpaulin with my head against its rolled-up bow edge. It was raised a\nlittle—since the ends of the lifeboat were higher than its middle—and so I could keep an\neye on Richard Parker.\nLater on I turned the other way, with my head resting just above the middle bench, my\nback to Richard Parker and his territory. In this position I was further away from the\nedges of the boat and less exposed to wind and spray."]}, {"num": 81, "paragraphs": ["I know my survival is hard to believe. When I think back, I can hardly believe it myself.\nMy crude exploitation of Richard Parker's weak sea legs is not the only explanation.\nThere is another: I was the source of food and water. Richard Parker had been a zoo\nanimal as long as he could remember, and he was used to sustenance coming to him\nwithout his lifting a paw. True, when it rained and the whole boat became a rain catcher,", "he understood where the water came from. And when we were hit by a school of flying\nfish, there too my role was not apparent. But these events did not change the reality of\nthings, which was that when he looked beyond the gunnel, he saw no jungle that he could\nhunt in and no river from which he could drink freely. Yet I brought him food and I\nbrought him fresh water. My agency was pure and miraculous. It conferred power upon\nme. Proof: I remained alive day after day, week after week. Proof: he did not attack me,\neven when I was asleep on the tarpaulin. Proof: I am here to tell you this story."]}];
+
+// ── STATE ──
+let selectedChapters = new Set();
+let currentChId = null;
+let notes = JSON.parse(localStorage.getItem('lop-notes-v3') || '[]');
+let cache = JSON.parse(localStorage.getItem('lop-cache-v3') || '{}');
+let annotations = {};
+let selParaText = '';
+let mode = 'both';
+let fontSize = 'md';
+let isLight = false;
+let sbOpen = true;
+let allSel = false;
+let isProcessing = false;
+
+// ── INIT ──
+function init() {
+  renderChList();
+  renderNotes();
+  updateProgress();
+}
+
+// ── THEME/UI ──
+function toggleTheme(){isLight=!isLight;document.body.classList.toggle('light',isLight);document.getElementById('themeBtn').textContent=isLight?'☀️':'🌙';}
+function cycleFont(){
+  const o=['md','sm','lg'];fontSize=o[(o.indexOf(fontSize)+1)%3];
+  document.getElementById('reader').className='reader'+(sbOpen?'':' wide')+' fs-'+fontSize;
+  document.getElementById('fontBtn').textContent={md:'字号',sm:'小字',lg:'大字'}[fontSize];
+}
+function setMode(m){
+  mode=m;['both','en','zh'].forEach(t=>document.getElementById('m-'+t).classList.toggle('on',t===m));
+  const bw=document.getElementById('bilWrap');
+  if(bw) bw.className='bil-wrap'+(m==='en'?' s-en':m==='zh'?' s-zh':'');
+}
+function toggleSidebar(){
+  sbOpen=!sbOpen;
+  document.getElementById('sidebar').classList.toggle('hidden',!sbOpen);
+  document.getElementById('reader').classList.toggle('wide',!sbOpen);
+  document.getElementById('sbBtn').classList.toggle('on',sbOpen);
+}
+
+// ── CHAPTER LIST ──
+function renderChList(){
+  const list=document.getElementById('chList');
+  list.innerHTML=BOOK_DATA.map(ch=>`
+    <div class="ch-item${cache['ch'+ch.num]?' cached':''}${currentChId===ch.num?' active':''}"
+         id="chi-${ch.num}" onclick="openChapter(${ch.num})">
+      <input type="checkbox" style="accent-color:var(--gold);width:11px;height:11px;cursor:pointer;flex-shrink:0"
+             id="chk-${ch.num}"
+             onclick="event.stopPropagation();toggleSel(${ch.num})"
+             ${selectedChapters.has(ch.num)?'checked':''}>
+      <span class="ch-name">Chapter ${ch.num}</span>
+    </div>
+  `).join('');
+}
+
+function toggleSel(num){
+  if(selectedChapters.has(num)) selectedChapters.delete(num);
+  else selectedChapters.add(num);
+  updateBatchInfo();
+}
+function toggleSelAll(){
+  allSel=!allSel;
+  BOOK_DATA.forEach(ch=>{
+    if(allSel) selectedChapters.add(ch.num);
+    else selectedChapters.delete(ch.num);
+    const c=document.getElementById('chk-'+ch.num);
+    if(c) c.checked=allSel;
+  });
+  document.getElementById('selAllBtn').textContent=allSel?'取消全选':'全选';
+  updateBatchInfo();
+}
+function updateBatchInfo(){
+  const sel=selectedChapters.size;
+  const cached=[...selectedChapters].filter(n=>cache['ch'+n]).length;
+  document.getElementById('batchInfo').textContent=
+    sel===0?'选择章节后开始处理':`已选 ${sel} 章 · 已缓存 ${cached} · 待处理 ${sel-cached}`;
+}
+function updateProgress(){
+  const el=document.getElementById('progFill');
+  if(!el) return;
+  const done=Object.keys(cache).length;
+  const total=BOOK_DATA.length;
+  el.style.width=(total?Math.round(done/total*100):0)+'%';
+}
+
+// ── OPEN CHAPTER ──
+function openChapter(num){
+  currentChId=num;
+  document.querySelectorAll('.ch-item').forEach(el=>el.classList.remove('active'));
+  const el=document.getElementById('chi-'+num);
+  if(el) el.classList.add('active');
+  document.getElementById('welcome').style.display='none';
+  renderChapter(num);
+}
+
+function renderChapter(num){
+  const ch=BOOK_DATA.find(c=>c.num===num);
+  if(!ch) return;
+  const data=cache['ch'+num];
+  const inner=document.getElementById('readerInner');
+
+  if(!data){
+    inner.innerHTML=`
+      <div class="ch-title"><h2>Chapter ${num}</h2></div>
+      <div class="ch-proc">
+        <div class="dots"><span></span><span></span><span></span></div>
+        <p>此章节尚未处理。请勾选后点击"处理选中章节"，或点下方单独处理。</p>
+        <button class="action-btn" style="margin-top:14px" onclick="quickProcess(${num})">单独处理本章</button>
+      </div>`;
+    return;
+  }
+
+  annotations={};
+  data.forEach(p=>(p.annotations||[]).forEach(a=>{annotations[a.word]=a;}));
+
+  const bilClass='bil-wrap'+(mode==='en'?' s-en':mode==='zh'?' s-zh':'');
+  const paras=data.map(p=>`
+    <div class="para-pair" onclick="selectPara(this,'${escQ(p.en.slice(0,100))}')">
+      <div class="p-en">${annotateText(p.en,p.annotations||[])}</div>
+      <div class="p-zh">${p.zh||''}</div>
+    </div>`).join('');
+
+  inner.innerHTML=`
+    <div class="ch-title"><h2>Chapter ${num}</h2><p>${data.length} 段落 · AI双语注释版</p></div>
+    <div class="legend">
+      <div class="leg"><div class="ld v"></div>生词</div>
+      <div class="leg"><div class="ld i"></div>俚语</div>
+      <div class="leg"><div class="ld c"></div>文化背景</div>
+      <div style="margin-left:auto;font-size:.66rem;color:var(--text3)">点高亮词查注释 · 点段落记笔记</div>
+    </div>
+    <div class="${bilClass}" id="bilWrap">${paras}</div>
+    <div class="review-box">
+      <div class="rb-head"><h3>✍️ AI书评</h3><button class="ghost-btn" onclick="genReview(${num})" id="rvBtn">生成书评</button></div>
+      <div class="rb-body" id="rvBody"><span class="rb-ph">添加笔记后点击生成...</span></div>
+    </div>`;
+
+  document.querySelectorAll('.an').forEach(el=>{
+    el.addEventListener('click',e=>{
+      e.stopPropagation();
+      const a=annotations[el.dataset.w];
+      if(a) showPopup(el,a);
+    });
+  });
+}
+
+// ── BATCH PROCESS ──
+async function batchProcess(){
+  const toProcess=[...selectedChapters].filter(n=>!cache['ch'+n]);
+  if(!toProcess.length){alert('选中章节已全部处理！');return;}
+  if(isProcessing) return;
+  isProcessing=true;
+  const btn=document.getElementById('procBtn');
+  btn.disabled=true;
+  let done=0;
+  for(const num of toProcess){
+    const el=document.getElementById('chi-'+num);
+    if(el) el.classList.add('processing');
+    btn.textContent=`处理中 ${++done}/${toProcess.length}...`;
+    const ch=BOOK_DATA.find(c=>c.num===num);
+    if(!ch) continue;
+    const chunks=chunkParas(ch.paragraphs,500);
+    let all=[];
+    for(const chunk of chunks){
+      try{all.push(...await processChunk(chunk));await sleep(350);}
+      catch(e){chunk.forEach(p=>all.push({en:p,zh:'（翻译失败）',annotations:[]}));}
+    }
+    cache['ch'+num]=all;
+    localStorage.setItem('lop-cache-v3',JSON.stringify(cache));
+    if(el){el.classList.remove('processing');el.classList.add('cached');}
+    updateProgress();
+    if(currentChId===num) renderChapter(num);
+  }
+  isProcessing=false;btn.disabled=false;btn.textContent='⚡ 处理选中章节';
+  updateBatchInfo();
+}
+
+async function quickProcess(num){
+  selectedChapters.add(num);
+  const c=document.getElementById('chk-'+num);
+  if(c) c.checked=true;
+  await batchProcess();
+}
+
+function chunkParas(paras,maxW){
+  const chunks=[];let cur=[],wc=0;
+  for(const p of paras){
+    const w=p.split(/\s+/).length;
+    if(wc+w>maxW&&cur.length){chunks.push(cur);cur=[];wc=0;}
+    cur.push(p);wc+=w;
+  }
+  if(cur.length) chunks.push(cur);
+  return chunks;
+}
+
+async function processChunk(paras){
+  const r=await fetch("https://corsproxy.io/?url=https://api.anthropic.com/v1/messages",{
+    method:"POST",headers:{"Content-Type":"application/json"},
+    body:JSON.stringify({
+      model:"claude-sonnet-4-20250514",max_tokens:1000,
+      system:`You are a bilingual literary assistant for "Life of Pi" by Yann Martel (chapters 58–81: Pi's survival at sea with Bengal tiger Richard Parker).
+Return ONLY valid JSON (no markdown, no backticks):
+{"paragraphs":[{"en":"original text","zh":"elegant literary Chinese","annotations":[{"word":"exact phrase","type":"vocab|idiom|culture","meaning":"Chinese explanation","example":"usage note"}]}]}
+Rules: one object per paragraph, preserve order. Chinese style: elegant, literary (李继宏译本风格). Annotate 1-3 items per paragraph max. type vocab=difficult words, idiom=expressions, culture=religious/cultural refs (Pi has many Hindu/Christian/Muslim references).`,
+      messages:[{role:"user",content:paras.join('\n\n')}]
+    })
+  });
+  const d=await r.json();
+  const raw=d.content.map(i=>i.text||'').join('');
+  return JSON.parse(raw.replace(/```json|```/g,'').trim()).paragraphs;
+}
+
+function sleep(ms){return new Promise(r=>setTimeout(r,ms));}
+
+// ── ANNOTATE ──
+function annotateText(text,anns){
+  if(!anns||!anns.length) return text;
+  let r=text;
+  [...anns].sort((a,b)=>b.word.length-a.word.length).forEach(a=>{
+    const esc=a.word.replace(/[.*+?^${}()|[\]\\]/g,'\\$&');
+    const cls=a.type==='vocab'?'v':a.type==='idiom'?'i':'c';
+    r=r.replace(new RegExp(`(?<![\\w])(${esc})(?![\\w])`,'g'),
+      `<span class="an ${cls}" data-w="${escQ(a.word)}">$1</span>`);
+  });
+  return r;
+}
+function escQ(s){return s.replace(/"/g,'&quot;').replace(/'/g,'&#39;');}
+
+// ── POPUP ──
+function showPopup(el,a){
+  const pop=document.getElementById('popup');
+  document.getElementById('pw').textContent=a.word;
+  const pt=document.getElementById('pt');
+  pt.textContent={vocab:'生词',idiom:'俚语/俗语',culture:'文化背景'}[a.type]||a.type;
+  pt.className='pt '+(a.type==='vocab'?'v':a.type==='idiom'?'i':'c');
+  document.getElementById('pm').textContent=a.meaning;
+  document.getElementById('pe').textContent=a.example||'';
+  const rect=el.getBoundingClientRect();
+  let top=rect.bottom+8,left=rect.left;
+  if(left+295>window.innerWidth) left=window.innerWidth-301;
+  if(top+175>window.innerHeight) top=rect.top-183;
+  pop.style.top=top+'px';pop.style.left=left+'px';
+  pop.classList.add('show');
+}
+document.addEventListener('click',e=>{
+  if(!e.target.closest('.popup')&&!e.target.closest('.an'))
+    document.getElementById('popup').classList.remove('show');
+});
+
+// ── NOTES ──
+function selectPara(el,quote){
+  document.querySelectorAll('.para-pair').forEach(p=>p.classList.remove('sel'));
+  el.classList.add('sel');selParaText=quote;
+  document.getElementById('nfQ').textContent='"'+quote.slice(0,65)+(quote.length>65?'…':'"');
+  document.getElementById('nfTa').value='';
+  document.getElementById('nf').classList.add('show');
+  document.getElementById('nfTa').focus();
+}
+function closeNF(){document.getElementById('nf').classList.remove('show');document.querySelectorAll('.para-pair').forEach(p=>p.classList.remove('sel'));}
+function saveNote(){
+  const t=document.getElementById('nfTa').value.trim();if(!t) return;
+  notes.push({quote:selParaText.slice(0,100),text:t,chNum:currentChId,time:new Date().toLocaleDateString('zh-CN')});
+  localStorage.setItem('lop-notes-v3',JSON.stringify(notes));
+  closeNF();renderNotes();
+}
+function deleteNote(i){notes.splice(i,1);localStorage.setItem('lop-notes-v3',JSON.stringify(notes));renderNotes();}
+function renderNotes(){
+  const list=document.getElementById('notesList');
+  document.getElementById('noteCnt').textContent=notes.length?`(${notes.length})`:'';
+  if(!notes.length){list.innerHTML='<p style="font-size:.7rem;color:var(--text3);font-style:italic;padding:4px 0">还没有笔记</p>';return;}
+  list.innerHTML=notes.map((n,i)=>`
+    <div class="note-card">
+      <button class="nc-del" onclick="deleteNote(${i})">✕</button>
+      <div class="nc-q">"${n.quote.slice(0,55)}…"</div>
+      <div class="nc-t">${n.text}</div>
+      <div style="font-size:.6rem;color:var(--text3);margin-top:4px">Ch.${n.chNum} · ${n.time}</div>
+    </div>`).join('');
+}
+
+// ── REVIEW ──
+async function genReview(num){
+  const btn=document.getElementById('rvBtn'),body=document.getElementById('rvBody');
+  btn.disabled=true;btn.textContent='生成中...';
+  body.innerHTML='<div class="dots"><span></span><span></span><span></span></div>';
+  const chNotes=notes.filter(n=>n.chNum===num);
+  const sample=(cache['ch'+num]||[]).slice(0,3).map(p=>p.en).join('\n\n');
+  const noteTxt=chNotes.length?chNotes.map(n=>`"${n.quote}" — ${n.text}`).join('\n')
+    : notes.length?notes.slice(0,4).map(n=>`[Ch.${n.chNum}] "${n.quote}" — ${n.text}`).join('\n'):'';
+  try{
+    const r=await fetch("https://corsproxy.io/?url=https://api.anthropic.com/v1/messages",{
+      method:"POST",headers:{"Content-Type":"application/json"},
+      body:JSON.stringify({
+        model:"claude-sonnet-4-20250514",max_tokens:1000,
+        system:'你是文学书评人。根据《少年Pi的奇幻漂流》第58-81章（Pi在太平洋上与老虎Richard Parker共存求生的段落）和读书笔记，写250-350字个性化书评。风格：豆瓣高分书评，有文学感，有个人见解，可引用原文。',
+        messages:[{role:"user",content:`章节：${num}\n\n摘录：\n${sample}\n\n笔记：\n${noteTxt||'（暂无笔记）'}`}]
+      })
+    });
+    const d=await r.json();
+    body.innerHTML=d.content.map(i=>i.text||'').join('').replace(/\n/g,'<br>');
+  }catch(e){body.innerHTML='<span class="rb-ph">生成失败，请重试</span>';}
+  btn.disabled=false;btn.textContent='重新生成';
+}
+
+function clearAndReprocess(){
+  if(!confirm('清除所有缓存并重新处理选中章节？')) return;
+  cache={};
+  localStorage.removeItem('lop-cache-v3');
+  // Mark all as uncached in UI
+  document.querySelectorAll('.ch-item').forEach(el=>el.classList.remove('cached'));
+  updateProgress();
+  updateBatchInfo();
+  // If currently viewing a chapter, re-render it (will show unprocessed state)
+  if(currentChId) renderChapter(currentChId);
+  // Now trigger batch process on selected chapters
+  if(selectedChapters.size>0) batchProcess();
+  else alert('缓存已清除！请勾选章节后点击处理。');
+}
+
+
+// ── BOOKMARK / QUOTE CARD ──
+let bmText = '';
+let bmStyle = 'dark';
+let bmSelectedEl = null;
+
+const BM_STYLES = {
+  dark: {
+    bg: '#0f0e0b', bg2: '#1a1714', accent: '#c8a96e', text: '#e8e0d0',
+    sub: '#7a6a50', border: 'rgba(200,169,110,0.3)', grain: true
+  },
+  warm: {
+    bg: '#f5ede0', bg2: '#ede0cc', accent: '#8a5a20', text: '#2a1a0a',
+    sub: '#8a7060', border: 'rgba(138,90,32,0.25)', grain: true
+  },
+  ocean: {
+    bg: '#0a1a2a', bg2: '#0f2235', accent: '#4a9ab8', text: '#d0e8f0',
+    sub: '#5a8090', border: 'rgba(74,154,184,0.3)', grain: false
+  },
+  minimal: {
+    bg: '#ffffff', bg2: '#f5f5f5', accent: '#1a1a1a', text: '#1a1a1a',
+    sub: '#888888', border: 'rgba(0,0,0,0.1)', grain: false
+  }
+};
+
+function setBMStyle(style, btn) {
+  bmStyle = style;
+  document.querySelectorAll('.bm-style-btn').forEach(b => b.classList.remove('on'));
+  btn.classList.add('on');
+  renderBMCanvas();
+}
+
+function makeBookmark() {
+  const sel = window.getSelection();
+  if (!sel || sel.isCollapsed) return;
+  bmText = sel.toString().trim();
+  if (bmText.length < 5) return;
+  document.getElementById('selToolbar').classList.remove('show');
+  document.getElementById('bmOverlay').classList.add('show');
+  renderBMCanvas();
+}
+
+function highlightSelection() {
+  // Simple visual highlight via range
+  const sel = window.getSelection();
+  if (!sel || sel.isCollapsed) return;
+  try {
+    const range = sel.getRangeAt(0);
+    const mark = document.createElement('mark');
+    mark.style.cssText = 'background:rgba(200,169,110,0.3);border-radius:2px;padding:0 1px;';
+    range.surroundContents(mark);
+    sel.removeAllRanges();
+  } catch(e) {}
+  document.getElementById('selToolbar').classList.remove('show');
+}
+
+function renderBMCanvas() {
+  const canvas = document.getElementById('bmCanvas');
+  const ctx = canvas.getContext('2d');
+  const s = BM_STYLES[bmStyle];
+  const W = 800, H = 500;
+  canvas.width = W; canvas.height = H;
+
+  // Background
+  ctx.fillStyle = s.bg;
+  ctx.fillRect(0, 0, W, H);
+
+  // Grain texture
+  if (s.grain) {
+    for (let i = 0; i < 8000; i++) {
+      ctx.fillStyle = `rgba(${bmStyle==='warm'?'80,40,0':'200,180,140'},${Math.random()*0.04})`;
+      ctx.fillRect(Math.random()*W, Math.random()*H, 1, 1);
+    }
+  }
+
+  // Left accent bar
+  const barGrad = ctx.createLinearGradient(0, 80, 0, H-80);
+  barGrad.addColorStop(0, s.accent + '00');
+  barGrad.addColorStop(0.3, s.accent);
+  barGrad.addColorStop(0.7, s.accent);
+  barGrad.addColorStop(1, s.accent + '00');
+  ctx.fillStyle = barGrad;
+  ctx.fillRect(52, 80, 2, H-160);
+
+  // Opening quote mark
+  ctx.font = 'italic 80px Georgia, serif';
+  ctx.fillStyle = s.accent;
+  ctx.globalAlpha = 0.18;
+  ctx.fillText('\u201C', 56, 140);
+  ctx.globalAlpha = 1;
+
+  // Quote text - wrap
+  const maxW = W - 170;
+  const fontSize = bmText.length > 200 ? 18 : bmText.length > 120 ? 21 : 24;
+  ctx.font = `${fontSize}px 'EB Garamond', Georgia, serif`;
+  ctx.fillStyle = s.text;
+  ctx.globalAlpha = 0.95;
+
+  const words = bmText.split(' ');
+  const lines = [];
+  let line = '';
+  for (const word of words) {
+    const test = line + (line ? ' ' : '') + word;
+    if (ctx.measureText(test).width > maxW && line) {
+      lines.push(line);
+      line = word;
+    } else {
+      line = test;
+    }
+  }
+  if (line) lines.push(line);
+
+  // Limit lines
+  const maxLines = Math.floor((H - 200) / (fontSize * 1.65));
+  const displayLines = lines.slice(0, maxLines);
+  if (lines.length > maxLines) displayLines[maxLines-1] += '…';
+
+  const totalH = displayLines.length * fontSize * 1.65;
+  const startY = (H - totalH) / 2 + fontSize;
+
+  displayLines.forEach((l, i) => {
+    ctx.fillText(l, 88, startY + i * fontSize * 1.65);
+  });
+  ctx.globalAlpha = 1;
+
+  // Bottom: book info
+  ctx.fillStyle = s.sub;
+  ctx.font = `13px 'Noto Sans SC', sans-serif`;
+  const chInfo = currentChId ? `Chapter ${currentChId}` : '';
+  ctx.fillText('Life of Pi  ·  Yann Martel  ' + (chInfo ? '·  ' + chInfo : ''), 88, H - 52);
+
+  // Small decorative dots
+  ctx.fillStyle = s.accent;
+  ctx.globalAlpha = 0.5;
+  [W-80, W-65, W-50].forEach(x => {
+    ctx.beginPath();
+    ctx.arc(x, H-52, 2, 0, Math.PI*2);
+    ctx.fill();
+  });
+  ctx.globalAlpha = 1;
+}
+
+function downloadBM() {
+  const canvas = document.getElementById('bmCanvas');
+  const link = document.createElement('a');
+  link.download = `LifeOfPi_Ch${currentChId||''}_quote.png`;
+  link.href = canvas.toDataURL('image/png');
+  link.click();
+}
+
+function closeBM(e) {
+  if (e && e.target !== document.getElementById('bmOverlay')) return;
+  document.getElementById('bmOverlay').classList.remove('show');
+}
+
+// ── TEXT SELECTION TOOLBAR ──
+document.addEventListener('mouseup', e => {
+  const toolbar = document.getElementById('selToolbar');
+  // Small delay to let selection settle
+  setTimeout(() => {
+    const sel = window.getSelection();
+    if (!sel || sel.isCollapsed || sel.toString().trim().length < 3) {
+      toolbar.classList.remove('show');
+      return;
+    }
+    // Only show inside reader
+    const node = sel.anchorNode;
+    if (!node) return;
+    const parent = node.parentElement;
+    if (!parent || !parent.closest('.p-en, .p-zh')) {
+      toolbar.classList.remove('show');
+      return;
+    }
+    const range = sel.getRangeAt(0);
+    const rect = range.getBoundingClientRect();
+    let left = rect.left + rect.width/2 - 80;
+    let top = rect.top - 44 + window.scrollY;
+    if (left < 8) left = 8;
+    if (left + 200 > window.innerWidth) left = window.innerWidth - 208;
+    toolbar.style.left = left + 'px';
+    toolbar.style.top = top + 'px';
+    toolbar.classList.add('show');
+  }, 10);
+});
+
+document.addEventListener('mousedown', e => {
+  if (!e.target.closest('.sel-toolbar')) {
+    document.getElementById('selToolbar').classList.remove('show');
+  }
+});
+
+
+init();
+</script>
+</body>
+</html>
